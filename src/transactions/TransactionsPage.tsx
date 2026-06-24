@@ -9,9 +9,10 @@ function errorMessage(e: unknown): string {
 }
 
 export function TransactionsPage() {
-  const { list, add, update } = useSheets()
+  const { list, add, update, clients: fetchClients, addClient } = useSheets()
 
   const [transactions, setTransactions] = useState<TransactionRecord[]>([])
+  const [clients, setClients] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState<TransactionRecord | null>(null)
@@ -33,11 +34,36 @@ export function TransactionsPage() {
     void reload()
   }, [reload])
 
+  // Client list is best-effort: a missing Clients tab shouldn't block the page.
+  useEffect(() => {
+    fetchClients()
+      .then(setClients)
+      .catch(() => undefined)
+  }, [fetchClients])
+
+  // Create the client in the Clients tab if it's a name we haven't seen yet.
+  const ensureClient = useCallback(
+    async (name: string) => {
+      const trimmed = name.trim()
+      if (!trimmed) return
+      const exists = clients.some(
+        (c) => c.toLowerCase() === trimmed.toLowerCase(),
+      )
+      if (exists) return
+      await addClient(trimmed)
+      setClients((prev) =>
+        [...prev, trimmed].sort((a, b) => a.localeCompare(b, 'fr')),
+      )
+    },
+    [clients, addClient],
+  )
+
   const handleSubmit = useCallback(
     async (draft: Transaction): Promise<boolean> => {
       setSaving(true)
       setError(null)
       try {
+        await ensureClient(draft.client)
         if (editing) {
           const updated = await update({ ...draft, row: editing.row })
           setTransactions((prev) =>
@@ -56,13 +82,14 @@ export function TransactionsPage() {
         setSaving(false)
       }
     },
-    [add, update, editing],
+    [add, update, editing, ensureClient],
   )
 
   return (
     <section className="transactions">
       <TransactionForm
         initial={editing}
+        clients={clients}
         onSubmit={handleSubmit}
         onCancel={() => setEditing(null)}
         busy={saving}

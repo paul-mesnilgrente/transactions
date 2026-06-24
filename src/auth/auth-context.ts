@@ -9,6 +9,11 @@ export interface UserProfile {
 export interface AuthContextValue {
   /** True once the GIS script has loaded and the token client is ready. */
   ready: boolean
+  /**
+   * True while we attempt to silently restore a previous session on load.
+   * Use it to avoid flashing the sign-in button before the restore resolves.
+   */
+  restoring: boolean
   /** The signed-in user's profile, or null when signed out. */
   user: UserProfile | null
   /** Prompt the user to sign in and grant access. */

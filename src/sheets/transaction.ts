@@ -27,7 +27,7 @@ export const COLUMN_SPAN = 'A:H'
  * first sheet in the spreadsheet; set it if your transactions live on a
  * specifically-named tab (e.g. 'Transactions').
  */
-export const SHEET_NAME = ''
+export const SHEET_NAME = 'Revenus'
 
 export interface Transaction {
   /** ISO date string, e.g. "2026-06-24". */

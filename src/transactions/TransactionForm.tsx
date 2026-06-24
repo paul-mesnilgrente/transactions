@@ -69,13 +69,21 @@ function toTransaction(d: Draft): Transaction {
 interface Props {
   /** When set, the form edits this record; otherwise it adds a new one. */
   initial?: TransactionRecord | null
+  /** Known client names, shown as autocomplete suggestions. */
+  clients?: string[]
   /** Persist the transaction. Resolve true on success so the form can reset. */
   onSubmit: (transaction: Transaction) => Promise<boolean>
   onCancel?: () => void
   busy?: boolean
 }
 
-export function TransactionForm({ initial, onSubmit, onCancel, busy }: Props) {
+export function TransactionForm({
+  initial,
+  clients = [],
+  onSubmit,
+  onCancel,
+  busy,
+}: Props) {
   const [draft, setDraft] = useState<Draft>(emptyDraft)
   const editing = initial != null
 
@@ -112,9 +120,17 @@ export function TransactionForm({ initial, onSubmit, onCancel, busy }: Props) {
           Client
           <input
             type="text"
+            list="clients-list"
+            autoComplete="off"
+            placeholder="Choisir ou créer…"
             value={draft.client}
             onChange={(e) => set('client', e.target.value)}
           />
+          <datalist id="clients-list">
+            {clients.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
         </label>
 
         <label>

@@ -5,6 +5,7 @@ import {
   listTransactions,
   updateTransaction,
 } from './sheetsService'
+import { appendClient, listClients } from './clientsService'
 import type { Transaction, TransactionRecord } from './transaction'
 
 /**
@@ -33,5 +34,16 @@ export function useSheets() {
     [getAccessToken],
   )
 
-  return { list, add, update }
+  const clients = useCallback(
+    async (): Promise<string[]> => listClients(await getAccessToken()),
+    [getAccessToken],
+  )
+
+  const addClient = useCallback(
+    async (name: string): Promise<void> =>
+      appendClient(await getAccessToken(), name),
+    [getAccessToken],
+  )
+
+  return { list, add, update, clients, addClient }
 }

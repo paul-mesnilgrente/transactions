@@ -3,7 +3,7 @@ import { TransactionsPage } from './transactions/TransactionsPage'
 import './App.css'
 
 function App() {
-  const { ready, user, signIn, signOut } = useAuth()
+  const { ready, restoring, user, signIn, signOut } = useAuth()
 
   return (
     <main className="app">
@@ -25,9 +25,9 @@ function App() {
         )}
       </header>
 
-      {!ready && <p>Chargement de la connexion Google…</p>}
+      {(!ready || restoring) && <p>Chargement de la connexion Google…</p>}
 
-      {ready && !user && (
+      {ready && !restoring && !user && (
         <button type="button" className="signin" onClick={signIn}>
           Se connecter avec Google
         </button>

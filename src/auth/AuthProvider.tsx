@@ -15,6 +15,10 @@ const SCOPES = [
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
+// Flag (not the token) persisted across refreshes so we only attempt a silent
+// re-auth for users who have already granted consent.
+const GRANTED_KEY = 'auth:granted'
+
 /** Inject the Google Identity Services script once and resolve when ready. */
 function loadGis(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -54,6 +58,11 @@ type Pending = {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
+  // Start in "restoring" if a previous session was granted, so the sign-in
+  // button doesn't flash before the silent re-auth resolves.
+  const [restoring, setRestoring] = useState(
+    () => localStorage.getItem(GRANTED_KEY) === '1',
+  )
   const [user, setUser] = useState<UserProfile | null>(null)
 
   const clientRef = useRef<GoogleTokenClient | null>(null)
@@ -105,6 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               value: response.access_token,
               expiresAt: Date.now() + response.expires_in * 1000,
             }
+            // Remember that consent was granted so we can silently restore
+            // the session on the next page load.
+            localStorage.setItem(GRANTED_KEY, '1')
             pendingRef.current.forEach((p) => p.resolve(response.access_token))
             pendingRef.current = []
             void fetchProfile(response.access_token)
@@ -116,8 +128,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         })
         setReady(true)
+
+        // If the user granted consent before, silently re-acquire a token
+        // (no popup) to restore the session after a refresh.
+        if (localStorage.getItem(GRANTED_KEY) === '1') {
+          new Promise<string>((resolve, reject) => {
+            pendingRef.current.push({ resolve, reject })
+            clientRef.current!.requestAccessToken({ prompt: '' })
+          })
+            .catch(() => {
+              // Silent restore failed (session expired or consent revoked);
+              // fall back to showing the sign-in button.
+              localStorage.removeItem(GRANTED_KEY)
+            })
+            .finally(() => {
+              if (!cancelled) setRestoring(false)
+            })
+        } else {
+          setRestoring(false)
+        }
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err)
+        setRestoring(false)
+      })
 
     return () => {
       cancelled = true
@@ -133,6 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = tokenRef.current?.value
     if (token) window.google?.accounts.oauth2.revoke(token)
     tokenRef.current = null
+    localStorage.removeItem(GRANTED_KEY)
     setUser(null)
   }, [])
 
@@ -156,7 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ready, user, signIn, signOut, getAccessToken }}
+      value={{ ready, restoring, user, signIn, signOut, getAccessToken }}
     >
       {children}
     </AuthContext.Provider>
