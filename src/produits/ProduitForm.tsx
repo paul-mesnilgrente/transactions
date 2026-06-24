@@ -1,10 +1,10 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
-import type { Transaction, TransactionRecord } from '../sheets/transaction'
+import type { Produit, ProduitRecord } from '../sheets/produit'
 
 const PAYMENT_TYPES = ['CB', 'ESP', 'VIR', 'Chèque']
 
 // The form keeps every field as a string (what inputs give us) and converts
-// to a Transaction on submit.
+// to a Produit on submit.
 interface Draft {
   date: string
   client: string
@@ -37,7 +37,7 @@ function emptyDraft(): Draft {
   }
 }
 
-function fromRecord(r: TransactionRecord): Draft {
+function fromRecord(r: ProduitRecord): Draft {
   return {
     date: r.date,
     client: r.client,
@@ -57,7 +57,7 @@ function parseAmount(value: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-function toTransaction(d: Draft): Transaction {
+function toProduit(d: Draft): Produit {
   return {
     date: d.date.trim(),
     client: d.client.trim(),
@@ -72,18 +72,18 @@ function toTransaction(d: Draft): Transaction {
 
 interface Props {
   /** When set, the form edits this record; otherwise it adds a new one. */
-  initial?: TransactionRecord | null
+  initial?: ProduitRecord | null
   /** Known client names, shown as autocomplete suggestions. */
   clients?: string[]
   /** Scroll the form into view and focus the first field on mount. */
   autoFocus?: boolean
-  /** Persist the transaction. Resolve true on success so the form can reset. */
-  onSubmit: (transaction: Transaction) => Promise<boolean>
+  /** Persist the produit. Resolve true on success so the form can reset. */
+  onSubmit: (produit: Produit) => Promise<boolean>
   onCancel?: () => void
   busy?: boolean
 }
 
-export function TransactionForm({
+export function ProduitForm({
   initial,
   clients = [],
   autoFocus,
@@ -118,7 +118,7 @@ export function TransactionForm({
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    const ok = await onSubmit(toTransaction(draft))
+    const ok = await onSubmit(toProduit(draft))
     if (ok && !editing) setDraft(emptyDraft())
   }
 
@@ -130,7 +130,7 @@ export function TransactionForm({
     >
       {editing && (
         <div className="small text-body-secondary mb-2">
-          Modifier la transaction
+          Modifier le produit
         </div>
       )}
 

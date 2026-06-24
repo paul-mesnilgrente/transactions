@@ -1,5 +1,5 @@
 import { useAuth } from './auth/auth-context'
-import { TransactionsPage } from './transactions/TransactionsPage'
+import { ProduitsPage } from './produits/ProduitsPage'
 
 function App() {
   const { ready, restoring, user, signIn, signOut } = useAuth()
@@ -73,7 +73,7 @@ function App() {
         </button>
       )}
 
-      {user && <TransactionsPage />}
+      {user && <ProduitsPage />}
     </main>
   )
 }

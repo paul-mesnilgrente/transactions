@@ -1,4 +1,4 @@
-import type { TransactionRecord } from '../sheets/transaction'
+import type { ProduitRecord } from '../sheets/produit'
 
 /** Sentinel meaning "no restriction" for the year/month dropdowns. */
 export const ALL = 'all'
@@ -84,7 +84,7 @@ export function dateParts(
 }
 
 /** Years present in the data, newest first, for the year picker. */
-export function yearsIn(rows: TransactionRecord[]): string[] {
+export function yearsIn(rows: ProduitRecord[]): string[] {
   const set = new Set<string>()
   for (const t of rows) {
     const parts = dateParts(t.date)
@@ -94,7 +94,7 @@ export function yearsIn(rows: TransactionRecord[]): string[] {
 }
 
 /** Distinct client names present in the data, sorted (FR). */
-export function clientsIn(rows: TransactionRecord[]): string[] {
+export function clientsIn(rows: ProduitRecord[]): string[] {
   const set = new Set<string>()
   for (const t of rows) {
     const name = t.client.trim()
@@ -104,9 +104,9 @@ export function clientsIn(rows: TransactionRecord[]): string[] {
 }
 
 export function applyFilters(
-  rows: TransactionRecord[],
+  rows: ProduitRecord[],
   f: Filters,
-): TransactionRecord[] {
+): ProduitRecord[] {
   const search = f.search.trim().toLowerCase()
   const yearAll = f.year === ALL
   const monthAll = f.month === ALL
@@ -145,7 +145,7 @@ export interface Totals {
 }
 
 /** Sum the billed amounts over the given rows, split by services and goods. */
-export function totals(rows: TransactionRecord[]): Totals {
+export function totals(rows: ProduitRecord[]): Totals {
   let services = 0
   let goods = 0
   for (const t of rows) {

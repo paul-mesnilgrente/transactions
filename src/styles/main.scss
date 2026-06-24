@@ -69,7 +69,7 @@ $link-color: $night-rider;
   }
 }
 
-// On phones the table becomes one card per transaction (no horizontal scroll).
+// On phones the table becomes one card per produit (no horizontal scroll).
 // Each cell shows its column label, and blank fields are hidden for a summary.
 @media (max-width: 640px) {
   .tx-table,

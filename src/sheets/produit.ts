@@ -1,4 +1,4 @@
-// Single source of truth for the transactions sheet layout.
+// Single source of truth for the produits sheet layout.
 //
 // Columns A–H, in order:
 //   A Date              C Prestations          E Marchandises          G Type de paiement
@@ -24,12 +24,12 @@ export const COLUMN_SPAN = 'A:H'
 
 /**
  * Name of the tab/worksheet to read and write. Leave empty to target the
- * first sheet in the spreadsheet; set it if your transactions live on a
- * specifically-named tab (e.g. 'Transactions').
+ * first sheet in the spreadsheet; set it if your produits live on a
+ * specifically-named tab (e.g. 'Produits').
  */
-export const SHEET_NAME = 'Revenus'
+export const SHEET_NAME = 'Produits'
 
-export interface Transaction {
+export interface Produit {
   /** ISO date string, e.g. "2026-06-24". */
   date: string
   client: string
@@ -46,8 +46,8 @@ export interface Transaction {
   notes: string
 }
 
-/** A transaction as read from the sheet, tagged with its 1-based row number. */
-export interface TransactionRecord extends Transaction {
+/** A produit as read from the sheet, tagged with its 1-based row number. */
+export interface ProduitRecord extends Produit {
   /** 1-based row in the sheet, used to target updates. */
   row: number
 }
@@ -66,11 +66,11 @@ function isEmptyRow(values: string[]): boolean {
   return values.every((v) => (v ?? '').trim() === '')
 }
 
-/** Map a sheet row (array of cell strings) to a TransactionRecord. */
+/** Map a sheet row (array of cell strings) to a ProduitRecord. */
 export function fromRow(
   values: string[],
   rowNumber: number,
-): TransactionRecord | null {
+): ProduitRecord | null {
   if (isEmptyRow(values)) return null
   const [
     date,
@@ -95,8 +95,8 @@ export function fromRow(
   }
 }
 
-/** Map a Transaction to a sheet row. Empty amounts become blank cells. */
-export function toRow(t: Transaction): (string | number)[] {
+/** Map a Produit to a sheet row. Empty amounts become blank cells. */
+export function toRow(t: Produit): (string | number)[] {
   return [
     t.date,
     t.client,

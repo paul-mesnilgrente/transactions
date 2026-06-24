@@ -1,4 +1,4 @@
-// Transaction reads/writes against the Revenus sheet.
+// Produit reads/writes against the Produits sheet.
 // Each function takes an OAuth access token (from the auth layer) and talks
 // directly to Sheets — no backend involved.
 
@@ -9,9 +9,9 @@ import {
   SHEET_NAME,
   fromRow,
   toRow,
-  type Transaction,
-  type TransactionRecord,
-} from './transaction'
+  type Produit,
+  type ProduitRecord,
+} from './produit'
 
 // The numeric sheetId (needed for row deletion) never changes, so cache it.
 let cachedSheetId: number | null = null
@@ -36,10 +36,10 @@ async function getSheetId(token: string): Promise<number> {
   return cachedSheetId
 }
 
-/** Read every transaction row from the sheet. */
-export async function listTransactions(
+/** Read every produit row from the sheet. */
+export async function listProduits(
   token: string,
-): Promise<TransactionRecord[]> {
+): Promise<ProduitRecord[]> {
   const a1 = a1Range(SHEET_NAME, `A${FIRST_DATA_ROW}:H`)
   const data = await sheetsFetch<ValueRange>(
     `/values/${encodeURIComponent(a1)}`,
@@ -48,43 +48,43 @@ export async function listTransactions(
   const rows = data.values ?? []
   return rows
     .map((row, i) => fromRow(row, FIRST_DATA_ROW + i))
-    .filter((r): r is TransactionRecord => r !== null)
+    .filter((r): r is ProduitRecord => r !== null)
 }
 
 interface AppendResponse {
   updates: { updatedRange: string }
 }
 
-/** Append a new transaction as the next row. Returns it tagged with its row number. */
-export async function appendTransaction(
+/** Append a new produit as the next row. Returns it tagged with its row number. */
+export async function appendProduit(
   token: string,
-  transaction: Transaction,
-): Promise<TransactionRecord> {
+  produit: Produit,
+): Promise<ProduitRecord> {
   const a1 = a1Range(SHEET_NAME, COLUMN_SPAN)
   const result = await sheetsFetch<AppendResponse>(
     `/values/${encodeURIComponent(a1)}:append?valueInputOption=${VALUE_INPUT}&insertDataOption=INSERT_ROWS`,
     token,
-    { method: 'POST', body: JSON.stringify({ values: [toRow(transaction)] }) },
+    { method: 'POST', body: JSON.stringify({ values: [toRow(produit)] }) },
   )
-  return { ...transaction, row: parseAppendedRow(result.updates.updatedRange) }
+  return { ...produit, row: parseAppendedRow(result.updates.updatedRange) }
 }
 
-/** Overwrite an existing transaction row in place. */
-export async function updateTransaction(
+/** Overwrite an existing produit row in place. */
+export async function updateProduit(
   token: string,
-  transaction: TransactionRecord,
-): Promise<TransactionRecord> {
-  const { row } = transaction
+  produit: ProduitRecord,
+): Promise<ProduitRecord> {
+  const { row } = produit
   const a1 = a1Range(SHEET_NAME, `A${row}:H${row}`)
   await sheetsFetch(
     `/values/${encodeURIComponent(a1)}?valueInputOption=${VALUE_INPUT}`,
     token,
-    { method: 'PUT', body: JSON.stringify({ values: [toRow(transaction)] }) },
+    { method: 'PUT', body: JSON.stringify({ values: [toRow(produit)] }) },
   )
-  return transaction
+  return produit
 }
 
-/** Extract the row number from an A1 range like "Revenus!A12:H12" or "A12:H12". */
+/** Extract the row number from an A1 range like "Produits!A12:H12" or "A12:H12". */
 function parseAppendedRow(updatedRange: string): number {
   const match = updatedRange.match(/[A-Z]+(\d+)/)
   return match ? Number(match[1]) : FIRST_DATA_ROW
@@ -94,7 +94,7 @@ function parseAppendedRow(updatedRange: string): number {
  * Delete the given 1-based row entirely (rows below it shift up by one).
  * Callers must renumber any cached rows greater than `row`.
  */
-export async function deleteTransaction(
+export async function deleteProduit(
   token: string,
   row: number,
 ): Promise<void> {

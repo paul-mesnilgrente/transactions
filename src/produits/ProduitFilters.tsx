@@ -8,7 +8,7 @@ interface Props {
   yearOptions: string[]
 }
 
-export function TransactionFilters({
+export function ProduitFilters({
   filters,
   onChange,
   onReset,

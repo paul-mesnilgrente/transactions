@@ -1,16 +1,16 @@
 import { useCallback } from 'react'
 import { useAuth } from '../auth/auth-context'
 import {
-  appendTransaction,
-  deleteTransaction,
-  listTransactions,
-  updateTransaction,
+  appendProduit,
+  deleteProduit,
+  listProduits,
+  updateProduit,
 } from './sheetsService'
 import { appendClient, listClients } from './clientsService'
-import type { Transaction, TransactionRecord } from './transaction'
+import type { Produit, ProduitRecord } from './produit'
 
 /**
- * Transaction CRUD bound to the signed-in user's access token. Each call
+ * Produit CRUD bound to the signed-in user's access token. Each call
  * fetches a fresh token (refreshing silently when needed) before hitting the
  * Sheets API, so callers don't manage tokens themselves.
  */
@@ -18,26 +18,26 @@ export function useSheets() {
   const { getAccessToken } = useAuth()
 
   const list = useCallback(
-    async (): Promise<TransactionRecord[]> =>
-      listTransactions(await getAccessToken()),
+    async (): Promise<ProduitRecord[]> =>
+      listProduits(await getAccessToken()),
     [getAccessToken],
   )
 
   const add = useCallback(
-    async (transaction: Transaction): Promise<TransactionRecord> =>
-      appendTransaction(await getAccessToken(), transaction),
+    async (produit: Produit): Promise<ProduitRecord> =>
+      appendProduit(await getAccessToken(), produit),
     [getAccessToken],
   )
 
   const update = useCallback(
-    async (transaction: TransactionRecord): Promise<TransactionRecord> =>
-      updateTransaction(await getAccessToken(), transaction),
+    async (produit: ProduitRecord): Promise<ProduitRecord> =>
+      updateProduit(await getAccessToken(), produit),
     [getAccessToken],
   )
 
   const remove = useCallback(
     async (row: number): Promise<void> =>
-      deleteTransaction(await getAccessToken(), row),
+      deleteProduit(await getAccessToken(), row),
     [getAccessToken],
   )
 

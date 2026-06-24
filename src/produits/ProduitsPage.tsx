@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSheets } from '../sheets/useSheets'
-import type { Transaction, TransactionRecord } from '../sheets/transaction'
+import type { Produit, ProduitRecord } from '../sheets/produit'
 import { ConfirmDialog } from '../components/ConfirmDialog'
-import { TransactionForm } from './TransactionForm'
-import { TransactionFilters } from './TransactionFilters'
-import { TransactionsTable } from './TransactionsTable'
+import { ProduitForm } from './ProduitForm'
+import { ProduitFilters } from './ProduitFilters'
+import { ProduitsTable } from './ProduitsTable'
 import {
   applyFilters,
   clientsIn,
@@ -24,7 +24,7 @@ const money = new Intl.NumberFormat('fr-FR', {
   currency: 'EUR',
 })
 
-export function TransactionsPage() {
+export function ProduitsPage() {
   const {
     list,
     add,
@@ -34,13 +34,13 @@ export function TransactionsPage() {
     addClient,
   } = useSheets()
 
-  const [transactions, setTransactions] = useState<TransactionRecord[]>([])
+  const [produits, setProduits] = useState<ProduitRecord[]>([])
   const [clients, setClients] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editing, setEditing] = useState<TransactionRecord | null>(null)
+  const [editing, setEditing] = useState<ProduitRecord | null>(null)
   const [saving, setSaving] = useState(false)
-  const [deleting, setDeleting] = useState<TransactionRecord | null>(null)
+  const [deleting, setDeleting] = useState<ProduitRecord | null>(null)
   const [deletingBusy, setDeletingBusy] = useState(false)
   const [filters, setFilters] = useState<Filters>(defaultFilters)
 
@@ -48,7 +48,7 @@ export function TransactionsPage() {
     setLoading(true)
     setError(null)
     try {
-      setTransactions(await list())
+      setProduits(await list())
     } catch (e) {
       setError(errorMessage(e))
     } finally {
@@ -85,13 +85,13 @@ export function TransactionsPage() {
   )
 
   const handleAdd = useCallback(
-    async (draft: Transaction): Promise<boolean> => {
+    async (draft: Produit): Promise<boolean> => {
       setSaving(true)
       setError(null)
       try {
         await ensureClient(draft.client)
         const added = await add(draft)
-        setTransactions((prev) => [...prev, added])
+        setProduits((prev) => [...prev, added])
         return true
       } catch (e) {
         setError(errorMessage(e))
@@ -104,14 +104,14 @@ export function TransactionsPage() {
   )
 
   const handleUpdate = useCallback(
-    async (draft: Transaction): Promise<boolean> => {
+    async (draft: Produit): Promise<boolean> => {
       if (!editing) return false
       setSaving(true)
       setError(null)
       try {
         await ensureClient(draft.client)
         const updated = await update({ ...draft, row: editing.row })
-        setTransactions((prev) =>
+        setProduits((prev) =>
           prev.map((t) => (t.row === updated.row ? updated : t)),
         )
         setEditing(null)
@@ -134,7 +134,7 @@ export function TransactionsPage() {
     try {
       await remove(deletedRow)
       // Deleting a row shifts every later row up by one, so renumber state.
-      setTransactions((prev) =>
+      setProduits((prev) =>
         prev
           .filter((t) => t.row !== deletedRow)
           .map((t) => (t.row > deletedRow ? { ...t, row: t.row - 1 } : t)),
@@ -152,24 +152,24 @@ export function TransactionsPage() {
     }
   }, [deleting, remove])
 
-  const clientOptions = useMemo(() => clientsIn(transactions), [transactions])
-  const yearOptions = useMemo(() => yearsIn(transactions), [transactions])
+  const clientOptions = useMemo(() => clientsIn(produits), [produits])
+  const yearOptions = useMemo(() => yearsIn(produits), [produits])
   const filtered = useMemo(
     // Most recent first (rows are appended chronologically to the sheet).
-    () => applyFilters(transactions, filters).reverse(),
-    [transactions, filters],
+    () => applyFilters(produits, filters).reverse(),
+    [produits, filters],
   )
   const filteredTotals = useMemo(() => totals(filtered), [filtered])
 
   return (
-    <section className="transactions">
+    <section className="produits">
       {error && (
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
       )}
 
-      <TransactionFilters
+      <ProduitFilters
         filters={filters}
         onChange={(f) => setFilters(normalizeFilters(f))}
         onReset={() => setFilters(defaultFilters())}
@@ -178,8 +178,8 @@ export function TransactionsPage() {
       />
 
       <p className="text-body-secondary small">
-        {filtered.length} / {transactions.length} transaction
-        {transactions.length > 1 ? 's' : ''} · Prestations&nbsp;:{' '}
+        {filtered.length} / {produits.length} produit
+        {produits.length > 1 ? 's' : ''} · Prestations&nbsp;:{' '}
         <strong>{money.format(filteredTotals.services)}</strong> ·
         Marchandises&nbsp;:{' '}
         <strong>{money.format(filteredTotals.goods)}</strong> · Total&nbsp;:{' '}
@@ -188,23 +188,23 @@ export function TransactionsPage() {
 
       {/* Always-present draft at the top of the list — adding is the most
           common action, so the form is permanently ready. */}
-      <TransactionForm
+      <ProduitForm
         clients={clients}
         onSubmit={handleAdd}
         busy={saving && editing == null}
       />
 
-      {loading && transactions.length === 0 ? (
+      {loading && produits.length === 0 ? (
         <p>Chargement…</p>
       ) : (
-        <TransactionsTable
-          transactions={filtered}
+        <ProduitsTable
+          produits={filtered}
           onEdit={setEditing}
           onDelete={setDeleting}
           editingRow={editing?.row}
           editor={
             editing && (
-              <TransactionForm
+              <ProduitForm
                 key={editing.row}
                 initial={editing}
                 clients={clients}
@@ -220,11 +220,11 @@ export function TransactionsPage() {
 
       <ConfirmDialog
         open={deleting != null}
-        title="Supprimer la transaction"
+        title="Supprimer le produit"
         message={
           deleting && (
             <>
-              Supprimer définitivement la transaction du{' '}
+              Supprimer définitivement le produit du{' '}
               <strong>{deleting.date}</strong>
               {deleting.client ? (
                 <>

@@ -5,7 +5,7 @@ const GSI_SRC = 'https://accounts.google.com/gsi/client'
 const USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo'
 
 // openid/email/profile let us show who is signed in; spreadsheets lets us
-// read and write the transactions sheet.
+// read and write the produits sheet.
 const SCOPES = [
   'openid',
   'email',

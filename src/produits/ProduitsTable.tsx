@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import type { TransactionRecord } from '../sheets/transaction'
+import type { ProduitRecord } from '../sheets/produit'
 
 const money = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -19,24 +19,24 @@ function cellClass(value: string, base = ''): string | undefined {
 }
 
 interface Props {
-  transactions: TransactionRecord[]
-  onEdit: (transaction: TransactionRecord) => void
-  onDelete: (transaction: TransactionRecord) => void
+  produits: ProduitRecord[]
+  onEdit: (produit: ProduitRecord) => void
+  onDelete: (produit: ProduitRecord) => void
   editingRow?: number
   /** Editor that replaces the row being edited (morph in place). */
   editor?: ReactNode
 }
 
-export function TransactionsTable({
-  transactions,
+export function ProduitsTable({
+  produits,
   onEdit,
   onDelete,
   editingRow,
   editor,
 }: Props) {
-  if (transactions.length === 0) {
+  if (produits.length === 0) {
     return (
-      <p className="text-body-secondary">Aucune transaction pour l'instant.</p>
+      <p className="text-body-secondary">Aucun produit pour l'instant.</p>
     )
   }
 
@@ -57,7 +57,7 @@ export function TransactionsTable({
           </tr>
         </thead>
         <tbody>
-          {transactions.map((t) => {
+          {produits.map((t) => {
             // The row being edited is replaced by the form (morph in place).
             if (t.row === editingRow && editor) {
               return (
