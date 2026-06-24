@@ -7,7 +7,10 @@ function App() {
   return (
     <main className="container py-4">
       <header className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-        <h1 className="h3 mb-0">Salon Transactions</h1>
+        <div className="d-flex align-items-center gap-2">
+          <img src="/logo.png" alt="Beekuty" height={44} />
+          <h1 className="h3 mb-0">Beekuty Compta</h1>
+        </div>
         {user && (
           <div className="d-flex align-items-center gap-3">
             {user.picture && (
