@@ -13,6 +13,29 @@ import {
   type TransactionRecord,
 } from './transaction'
 
+// The numeric sheetId (needed for row deletion) never changes, so cache it.
+let cachedSheetId: number | null = null
+
+interface SpreadsheetMeta {
+  sheets: { properties: { sheetId: number; title: string } }[]
+}
+
+/** Resolve the numeric ID of the configured tab (or the first sheet). */
+async function getSheetId(token: string): Promise<number> {
+  if (cachedSheetId != null) return cachedSheetId
+  const fields = encodeURIComponent('sheets(properties(sheetId,title))')
+  const data = await sheetsFetch<SpreadsheetMeta>(`?fields=${fields}`, token)
+  const sheets = data.sheets ?? []
+  const match = SHEET_NAME
+    ? sheets.find((s) => s.properties.title === SHEET_NAME)
+    : sheets[0]
+  if (!match) {
+    throw new Error(`Onglet introuvable : ${SHEET_NAME || '(premier)'}`)
+  }
+  cachedSheetId = match.properties.sheetId
+  return cachedSheetId
+}
+
 /** Read every transaction row from the sheet. */
 export async function listTransactions(
   token: string,
@@ -65,4 +88,32 @@ export async function updateTransaction(
 function parseAppendedRow(updatedRange: string): number {
   const match = updatedRange.match(/[A-Z]+(\d+)/)
   return match ? Number(match[1]) : FIRST_DATA_ROW
+}
+
+/**
+ * Delete the given 1-based row entirely (rows below it shift up by one).
+ * Callers must renumber any cached rows greater than `row`.
+ */
+export async function deleteTransaction(
+  token: string,
+  row: number,
+): Promise<void> {
+  const sheetId = await getSheetId(token)
+  await sheetsFetch(':batchUpdate', token, {
+    method: 'POST',
+    body: JSON.stringify({
+      requests: [
+        {
+          deleteDimension: {
+            range: {
+              sheetId,
+              dimension: 'ROWS',
+              startIndex: row - 1, // API indices are 0-based, end-exclusive.
+              endIndex: row,
+            },
+          },
+        },
+      ],
+    }),
+  })
 }

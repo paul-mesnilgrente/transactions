@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSheets } from '../sheets/useSheets'
 import type { Transaction, TransactionRecord } from '../sheets/transaction'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { TransactionForm } from './TransactionForm'
 import { TransactionFilters } from './TransactionFilters'
 import { TransactionsTable } from './TransactionsTable'
@@ -24,7 +25,14 @@ const money = new Intl.NumberFormat('fr-FR', {
 })
 
 export function TransactionsPage() {
-  const { list, add, update, clients: fetchClients, addClient } = useSheets()
+  const {
+    list,
+    add,
+    update,
+    remove,
+    clients: fetchClients,
+    addClient,
+  } = useSheets()
 
   const [transactions, setTransactions] = useState<TransactionRecord[]>([])
   const [clients, setClients] = useState<string[]>([])
@@ -32,6 +40,8 @@ export function TransactionsPage() {
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState<TransactionRecord | null>(null)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState<TransactionRecord | null>(null)
+  const [deletingBusy, setDeletingBusy] = useState(false)
   const [filters, setFilters] = useState<Filters>(defaultFilters)
 
   const reload = useCallback(async () => {
@@ -101,6 +111,32 @@ export function TransactionsPage() {
     [add, update, editing, ensureClient],
   )
 
+  const confirmDelete = useCallback(async () => {
+    if (!deleting) return
+    const deletedRow = deleting.row
+    setDeletingBusy(true)
+    setError(null)
+    try {
+      await remove(deletedRow)
+      // Deleting a row shifts every later row up by one, so renumber state.
+      setTransactions((prev) =>
+        prev
+          .filter((t) => t.row !== deletedRow)
+          .map((t) => (t.row > deletedRow ? { ...t, row: t.row - 1 } : t)),
+      )
+      setEditing((cur) => {
+        if (!cur) return cur
+        if (cur.row === deletedRow) return null
+        return cur.row > deletedRow ? { ...cur, row: cur.row - 1 } : cur
+      })
+      setDeleting(null)
+    } catch (e) {
+      setError(errorMessage(e))
+    } finally {
+      setDeletingBusy(false)
+    }
+  }, [deleting, remove])
+
   const clientOptions = useMemo(() => clientsIn(transactions), [transactions])
   const yearOptions = useMemo(() => yearsIn(transactions), [transactions])
   const filtered = useMemo(
@@ -152,9 +188,34 @@ export function TransactionsPage() {
         <TransactionsTable
           transactions={filtered}
           onEdit={setEditing}
+          onDelete={setDeleting}
           editingRow={editing?.row}
         />
       )}
+
+      <ConfirmDialog
+        open={deleting != null}
+        title="Supprimer la transaction"
+        message={
+          deleting && (
+            <>
+              Supprimer définitivement la transaction du{' '}
+              <strong>{deleting.date}</strong>
+              {deleting.client ? (
+                <>
+                  {' '}
+                  pour <strong>{deleting.client}</strong>
+                </>
+              ) : null}
+              &nbsp;? Cette action est irréversible.
+            </>
+          )
+        }
+        confirmLabel="Supprimer"
+        busy={deletingBusy}
+        onConfirm={() => void confirmDelete()}
+        onCancel={() => setDeleting(null)}
+      />
     </section>
   )
 }

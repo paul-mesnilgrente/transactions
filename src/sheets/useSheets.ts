@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { useAuth } from '../auth/auth-context'
 import {
   appendTransaction,
+  deleteTransaction,
   listTransactions,
   updateTransaction,
 } from './sheetsService'
@@ -34,6 +35,12 @@ export function useSheets() {
     [getAccessToken],
   )
 
+  const remove = useCallback(
+    async (row: number): Promise<void> =>
+      deleteTransaction(await getAccessToken(), row),
+    [getAccessToken],
+  )
+
   const clients = useCallback(
     async (): Promise<string[]> => listClients(await getAccessToken()),
     [getAccessToken],
@@ -45,5 +52,5 @@ export function useSheets() {
     [getAccessToken],
   )
 
-  return { list, add, update, clients, addClient }
+  return { list, add, update, remove, clients, addClient }
 }

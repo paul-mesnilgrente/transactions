@@ -20,10 +20,16 @@ function cellClass(value: string, base = ''): string | undefined {
 interface Props {
   transactions: TransactionRecord[]
   onEdit: (transaction: TransactionRecord) => void
+  onDelete: (transaction: TransactionRecord) => void
   editingRow?: number
 }
 
-export function TransactionsTable({ transactions, onEdit, editingRow }: Props) {
+export function TransactionsTable({
+  transactions,
+  onEdit,
+  onDelete,
+  editingRow,
+}: Props) {
   if (transactions.length === 0) {
     return <p className="empty">Aucune transaction pour l'instant.</p>
   }
@@ -84,9 +90,18 @@ export function TransactionsTable({ transactions, onEdit, editingRow }: Props) {
                   {t.notes}
                 </td>
                 <td className="actions-cell">
-                  <button type="button" onClick={() => onEdit(t)}>
-                    Modifier
-                  </button>
+                  <div className="row-actions">
+                    <button type="button" onClick={() => onEdit(t)}>
+                      Modifier
+                    </button>
+                    <button
+                      type="button"
+                      className="danger"
+                      onClick={() => onDelete(t)}
+                    >
+                      Supprimer
+                    </button>
+                  </div>
                 </td>
               </tr>
             )
