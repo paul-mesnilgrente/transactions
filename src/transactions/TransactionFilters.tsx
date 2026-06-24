@@ -26,10 +26,14 @@ export function TransactionFilters({
   }
 
   return (
-    <div className="filters">
-      <label>
-        Année
+    <div className="row g-2 align-items-end mb-3">
+      <div className="col-6 col-md-auto">
+        <label htmlFor="filter-year" className="form-label small mb-1">
+          Année
+        </label>
         <select
+          id="filter-year"
+          className="form-select"
           value={filters.year}
           onChange={(e) => set('year', e.target.value)}
         >
@@ -40,12 +44,16 @@ export function TransactionFilters({
           ))}
           <option value={ALL}>Tout</option>
         </select>
-      </label>
+      </div>
 
-      <label>
-        Mois
+      <div className="col-6 col-md-auto">
+        <label htmlFor="filter-month" className="form-label small mb-1">
+          Mois
+        </label>
         {/* When the year is "Tout", the month is forced to "Tout" too. */}
         <select
+          id="filter-month"
+          className="form-select"
           value={filters.month}
           disabled={filters.year === ALL}
           onChange={(e) => set('month', e.target.value)}
@@ -57,11 +65,15 @@ export function TransactionFilters({
           ))}
           <option value={ALL}>Tout</option>
         </select>
-      </label>
+      </div>
 
-      <label>
-        Client
+      <div className="col-12 col-md-auto">
+        <label htmlFor="filter-client" className="form-label small mb-1">
+          Client
+        </label>
         <select
+          id="filter-client"
+          className="form-select"
           value={filters.client}
           onChange={(e) => set('client', e.target.value)}
         >
@@ -72,21 +84,31 @@ export function TransactionFilters({
             </option>
           ))}
         </select>
-      </label>
+      </div>
 
-      <label className="grow">
-        Recherche
+      <div className="col-12 col-md">
+        <label htmlFor="filter-search" className="form-label small mb-1">
+          Recherche
+        </label>
         <input
+          id="filter-search"
           type="search"
+          className="form-control"
           placeholder="Prestation, marchandise, note…"
           value={filters.search}
           onChange={(e) => set('search', e.target.value)}
         />
-      </label>
+      </div>
 
-      <button type="button" className="reset" onClick={onReset}>
-        Réinitialiser
-      </button>
+      <div className="col-12 col-md-auto">
+        <button
+          type="button"
+          className="btn btn-outline-secondary w-100"
+          onClick={onReset}
+        >
+          Réinitialiser
+        </button>
+      </div>
     </div>
   )
 }

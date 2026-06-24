@@ -1,34 +1,45 @@
 import { useAuth } from './auth/auth-context'
 import { TransactionsPage } from './transactions/TransactionsPage'
-import './App.css'
 
 function App() {
   const { ready, restoring, user, signIn, signOut } = useAuth()
 
   return (
-    <main className="app">
-      <header className="topbar">
-        <h1>Salon Transactions</h1>
+    <main className="container py-4">
+      <header className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <h1 className="h3 mb-0">Salon Transactions</h1>
         {user && (
-          <div className="account">
+          <div className="d-flex align-items-center gap-3">
             {user.picture && (
-              <img src={user.picture} alt="" width={36} height={36} />
+              <img
+                src={user.picture}
+                alt=""
+                width={36}
+                height={36}
+                className="rounded-circle"
+              />
             )}
-            <div className="account-info">
-              <strong>{user.name}</strong>
-              <span>{user.email}</span>
+            <div className="lh-sm small">
+              <strong className="d-block">{user.name}</strong>
+              <span className="text-body-secondary">{user.email}</span>
             </div>
-            <button type="button" onClick={signOut}>
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm"
+              onClick={signOut}
+            >
               Se déconnecter
             </button>
           </div>
         )}
       </header>
 
-      {(!ready || restoring) && <p>Chargement de la connexion Google…</p>}
+      {(!ready || restoring) && (
+        <p className="text-body-secondary">Chargement de la connexion Google…</p>
+      )}
 
       {ready && !restoring && !user && (
-        <button type="button" className="signin" onClick={signIn}>
+        <button type="button" className="btn btn-primary" onClick={signIn}>
           Se connecter avec Google
         </button>
       )}

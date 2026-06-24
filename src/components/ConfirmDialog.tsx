@@ -33,30 +33,53 @@ export function ConfirmDialog({
   if (!open) return null
 
   return (
-    <div className="modal-overlay" role="presentation" onClick={onCancel}>
+    <>
       <div
-        className="modal"
+        className="modal fade show d-block"
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        onClick={(e) => e.stopPropagation()}
+        onClick={onCancel}
       >
-        <h2>{title}</h2>
-        <div className="modal-body">{message}</div>
-        <div className="modal-actions">
-          <button type="button" onClick={onCancel} disabled={busy}>
-            {cancelLabel}
-          </button>
-          <button
-            type="button"
-            className="danger"
-            onClick={onConfirm}
-            disabled={busy}
-          >
-            {busy ? 'Suppression…' : confirmLabel}
-          </button>
+        <div
+          className="modal-dialog modal-dialog-centered"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2 className="modal-title h5">{title}</h2>
+              <button
+                type="button"
+                className="btn-close"
+                aria-label="Fermer"
+                onClick={onCancel}
+                disabled={busy}
+              />
+            </div>
+            <div className="modal-body">{message}</div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={onCancel}
+                disabled={busy}
+              >
+                {cancelLabel}
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={onConfirm}
+                disabled={busy}
+              >
+                {busy ? 'Suppression…' : confirmLabel}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+      <div className="modal-backdrop fade show" />
+    </>
   )
 }

@@ -156,11 +156,20 @@ export function TransactionsPage() {
         busy={saving}
       />
 
-      {error && <p className="error" role="alert">{error}</p>}
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
 
-      <div className="list-header">
-        <h2>Transactions</h2>
-        <button type="button" onClick={() => void reload()} disabled={loading}>
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <h2 className="h5 mb-0">Transactions</h2>
+        <button
+          type="button"
+          className="btn btn-outline-secondary btn-sm"
+          onClick={() => void reload()}
+          disabled={loading}
+        >
           {loading ? 'Chargement…' : 'Rafraîchir'}
         </button>
       </div>
@@ -173,7 +182,7 @@ export function TransactionsPage() {
         yearOptions={yearOptions}
       />
 
-      <p className="summary">
+      <p className="text-body-secondary small">
         {filtered.length} / {transactions.length} transaction
         {transactions.length > 1 ? 's' : ''} · Prestations&nbsp;:{' '}
         <strong>{money.format(filteredTotals.services)}</strong> ·

@@ -31,20 +31,22 @@ export function TransactionsTable({
   editingRow,
 }: Props) {
   if (transactions.length === 0) {
-    return <p className="empty">Aucune transaction pour l'instant.</p>
+    return (
+      <p className="text-body-secondary">Aucune transaction pour l'instant.</p>
+    )
   }
 
   return (
-    <div className="table-wrap">
-      <table className="tx-table">
+    <div>
+      <table className="table table-hover align-middle mb-0 tx-table">
         <thead>
           <tr>
             <th>Date</th>
             <th>Client</th>
             <th>Prestations</th>
-            <th className="num">Facturé prest.</th>
+            <th className="num">€</th>
             <th>Marchandises</th>
-            <th className="num">Facturé march.</th>
+            <th className="num">€</th>
             <th>Paiement</th>
             <th>Notes</th>
             <th aria-label="Actions" />
@@ -89,14 +91,18 @@ export function TransactionsTable({
                 <td data-label="Notes" className={cellClass(t.notes)}>
                   {t.notes}
                 </td>
-                <td className="actions-cell">
-                  <div className="row-actions">
-                    <button type="button" onClick={() => onEdit(t)}>
+                <td className="actions-cell text-end">
+                  <div className="row-actions justify-content-end">
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() => onEdit(t)}
+                    >
                       Modifier
                     </button>
                     <button
                       type="button"
-                      className="danger"
+                      className="btn btn-sm btn-outline-danger"
                       onClick={() => onDelete(t)}
                     >
                       Supprimer

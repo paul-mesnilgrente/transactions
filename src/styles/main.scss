@@ -1,0 +1,110 @@
+// ===========================================================================
+// Beekuty brand palette (mirrored from ~/Dev/beekuty/_sass/_colors.scss)
+// ===========================================================================
+$wild-sand: #f2efed;
+$night-rider: #333333;
+$pale-prim: #faf5a6;
+$sweet-corn: #f7eb7f;
+$granny-smith-apple: #9adf95;
+$downey: #74ceb2; // brand primary (teal)
+$light-yellow: #ffffe4; // brand background
+
+// ===========================================================================
+// Bootstrap variable overrides — must come BEFORE the Bootstrap import.
+// We keep dimensions practical for a dense data app (no 1.5rem base font,
+// no 3px borders), and bring over the brand colours.
+// ===========================================================================
+$primary: $downey;
+$body-bg: $light-yellow;
+$border-color: $night-rider;
+$link-color: $night-rider;
+
+@import 'bootstrap/scss/bootstrap';
+
+// ===========================================================================
+// App-specific styles
+// ===========================================================================
+
+// Right-align the amount columns.
+.tx-table th.num,
+.tx-table td.num {
+  text-align: right;
+}
+
+// Highlight the row currently being edited with the brand pale yellow.
+.tx-table tbody tr.editing > td {
+  background-color: $pale-prim;
+}
+
+.row-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+// On phones the table becomes one card per transaction (no horizontal scroll).
+// Each cell shows its column label, and blank fields are hidden for a summary.
+@media (max-width: 640px) {
+  .tx-table,
+  .tx-table tbody,
+  .tx-table tr,
+  .tx-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .tx-table thead {
+    display: none;
+  }
+
+  .tx-table tbody tr {
+    border: 2px solid $night-rider;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tx-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+    border: none;
+    box-shadow: none;
+    white-space: normal;
+    text-align: right;
+  }
+
+  // Column label, taken from the cell's data-label attribute.
+  .tx-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: $night-rider;
+    text-align: left;
+  }
+
+  // Hide blank fields to keep each card to a summary.
+  .tx-table td.empty {
+    display: none;
+  }
+
+  .tx-table td[data-label='Client'] {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .tx-table td.actions-cell {
+    padding-top: 0.5rem;
+  }
+
+  .tx-table td.actions-cell::before {
+    content: none;
+  }
+
+  .tx-table td.actions-cell .row-actions {
+    width: 100%;
+  }
+
+  .tx-table td.actions-cell .row-actions .btn {
+    flex: 1;
+  }
+}

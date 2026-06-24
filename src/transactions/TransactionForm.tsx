@@ -106,14 +106,20 @@ export function TransactionForm({
   }
 
   return (
-    <form className="tx-form" onSubmit={handleSubmit}>
-      <h2>{editing ? 'Modifier la transaction' : 'Nouvelle transaction'}</h2>
+    <form className="card card-body shadow-sm mb-4" onSubmit={handleSubmit}>
+      <h2 className="h5 mb-3">
+        {editing ? 'Modifier la transaction' : 'Nouvelle transaction'}
+      </h2>
 
-      <div className="grid">
-        <label>
-          Date
+      <div className="row g-3">
+        <div className="col-12 col-sm-6 col-lg-3">
+          <label htmlFor="tx-date" className="form-label">
+            Date
+          </label>
           <input
+            id="tx-date"
             type="text"
+            className="form-control"
             inputMode="numeric"
             placeholder="JJ/MM/AAAA"
             pattern="\d{1,2}/\d{1,2}/\d{4}"
@@ -122,12 +128,16 @@ export function TransactionForm({
             onChange={(e) => set('date', e.target.value)}
             required
           />
-        </label>
+        </div>
 
-        <label>
-          Client
+        <div className="col-12 col-sm-6 col-lg-3">
+          <label htmlFor="tx-client" className="form-label">
+            Client
+          </label>
           <input
+            id="tx-client"
             type="text"
+            className="form-control"
             list="clients-list"
             autoComplete="off"
             placeholder="Choisir ou créer…"
@@ -139,52 +149,72 @@ export function TransactionForm({
               <option key={c} value={c} />
             ))}
           </datalist>
-        </label>
+        </div>
 
-        <label>
-          Prestations
+        <div className="col-12 col-sm-6 col-lg-3">
+          <label htmlFor="tx-services" className="form-label">
+            Prestations
+          </label>
           <input
+            id="tx-services"
             type="text"
+            className="form-control"
             value={draft.services}
             onChange={(e) => set('services', e.target.value)}
           />
-        </label>
+        </div>
 
-        <label>
-          Facturé prestation
+        <div className="col-12 col-sm-6 col-lg-3">
+          <label htmlFor="tx-services-amount" className="form-label">
+            Facturé prestation
+          </label>
           <input
+            id="tx-services-amount"
             type="number"
+            className="form-control"
             step="0.01"
             inputMode="decimal"
             value={draft.servicesAmount}
             onChange={(e) => set('servicesAmount', e.target.value)}
           />
-        </label>
+        </div>
 
-        <label>
-          Marchandises
+        <div className="col-12 col-sm-6 col-lg-3">
+          <label htmlFor="tx-goods" className="form-label">
+            Marchandises
+          </label>
           <input
+            id="tx-goods"
             type="text"
+            className="form-control"
             value={draft.goods}
             onChange={(e) => set('goods', e.target.value)}
           />
-        </label>
+        </div>
 
-        <label>
-          Facturé marchandise
+        <div className="col-12 col-sm-6 col-lg-3">
+          <label htmlFor="tx-goods-amount" className="form-label">
+            Facturé marchandise
+          </label>
           <input
+            id="tx-goods-amount"
             type="number"
+            className="form-control"
             step="0.01"
             inputMode="decimal"
             value={draft.goodsAmount}
             onChange={(e) => set('goodsAmount', e.target.value)}
           />
-        </label>
+        </div>
 
-        <label>
-          Type de paiement
+        <div className="col-12 col-sm-6 col-lg-3">
+          <label htmlFor="tx-payment" className="form-label">
+            Type de paiement
+          </label>
           <input
+            id="tx-payment"
             type="text"
+            className="form-control"
             list="payment-types"
             value={draft.paymentType}
             onChange={(e) => set('paymentType', e.target.value)}
@@ -194,24 +224,33 @@ export function TransactionForm({
               <option key={p} value={p} />
             ))}
           </datalist>
-        </label>
+        </div>
 
-        <label className="full">
-          Notes
+        <div className="col-12">
+          <label htmlFor="tx-notes" className="form-label">
+            Notes
+          </label>
           <textarea
+            id="tx-notes"
+            className="form-control"
             rows={2}
             value={draft.notes}
             onChange={(e) => set('notes', e.target.value)}
           />
-        </label>
+        </div>
       </div>
 
-      <div className="actions">
-        <button type="submit" disabled={busy}>
+      <div className="d-flex gap-2 mt-3">
+        <button type="submit" className="btn btn-primary" disabled={busy}>
           {busy ? 'Enregistrement…' : editing ? 'Mettre à jour' : 'Ajouter'}
         </button>
         {editing && onCancel && (
-          <button type="button" onClick={onCancel} disabled={busy}>
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={onCancel}
+            disabled={busy}
+          >
             Annuler
           </button>
         )}
