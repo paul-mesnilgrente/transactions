@@ -104,7 +104,8 @@ export function TransactionsPage() {
   const clientOptions = useMemo(() => clientsIn(transactions), [transactions])
   const yearOptions = useMemo(() => yearsIn(transactions), [transactions])
   const filtered = useMemo(
-    () => applyFilters(transactions, filters),
+    // Most recent first (rows are appended chronologically to the sheet).
+    () => applyFilters(transactions, filters).reverse(),
     [transactions, filters],
   )
   const filteredTotals = useMemo(() => totals(filtered), [filtered])
