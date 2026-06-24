@@ -125,22 +125,24 @@ export function TransactionForm({
   return (
     <form
       ref={formRef}
-      className="card card-body shadow-sm mb-4"
+      className="card card-body shadow-sm mb-3"
       onSubmit={handleSubmit}
     >
-      <h2 className="h5 mb-3">
-        {editing ? 'Modifier la transaction' : 'Nouvelle transaction'}
-      </h2>
+      {editing && (
+        <div className="small text-body-secondary mb-2">
+          Modifier la transaction
+        </div>
+      )}
 
-      <div className="row g-3">
-        <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor={id('date')} className="form-label">
+      <div className="row g-2">
+        <div className="col-4 col-lg-2">
+          <label htmlFor={id('date')} className="visually-hidden">
             Date
           </label>
           <input
             id={id('date')}
             type="text"
-            className="form-control"
+            className="form-control form-control-sm"
             inputMode="numeric"
             placeholder="JJ/MM/AAAA"
             pattern="\d{1,2}/\d{1,2}/\d{4}"
@@ -151,17 +153,17 @@ export function TransactionForm({
           />
         </div>
 
-        <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor={id('client')} className="form-label">
+        <div className="col-8 col-lg-2">
+          <label htmlFor={id('client')} className="visually-hidden">
             Client
           </label>
           <input
             id={id('client')}
             type="text"
-            className="form-control"
+            className="form-control form-control-sm"
             list={id('clients-list')}
             autoComplete="off"
-            placeholder="Choisir ou créer…"
+            placeholder="Client"
             value={draft.client}
             onChange={(e) => set('client', e.target.value)}
           />
@@ -172,71 +174,74 @@ export function TransactionForm({
           </datalist>
         </div>
 
-        <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor={id('services')} className="form-label">
-            Prestations
-          </label>
-          <input
-            id={id('services')}
-            type="text"
-            className="form-control"
-            value={draft.services}
-            onChange={(e) => set('services', e.target.value)}
-          />
+        {/* Prestations + montant facturé */}
+        <div className="col-12 col-lg-3">
+          <div className="input-group input-group-sm">
+            <label htmlFor={id('services')} className="visually-hidden">
+              Prestations
+            </label>
+            <input
+              id={id('services')}
+              type="text"
+              className="form-control"
+              placeholder="Prestations"
+              value={draft.services}
+              onChange={(e) => set('services', e.target.value)}
+            />
+            <input
+              type="number"
+              className="form-control flex-grow-0"
+              style={{ width: '5.5rem' }}
+              step="0.01"
+              inputMode="decimal"
+              placeholder="0,00"
+              aria-label="Facturé prestation"
+              value={draft.servicesAmount}
+              onChange={(e) => set('servicesAmount', e.target.value)}
+            />
+            <span className="input-group-text">€</span>
+          </div>
         </div>
 
-        <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor={id('services-amount')} className="form-label">
-            Facturé prestation
-          </label>
-          <input
-            id={id('services-amount')}
-            type="number"
-            className="form-control"
-            step="0.01"
-            inputMode="decimal"
-            value={draft.servicesAmount}
-            onChange={(e) => set('servicesAmount', e.target.value)}
-          />
+        {/* Marchandises + montant facturé */}
+        <div className="col-12 col-lg-3">
+          <div className="input-group input-group-sm">
+            <label htmlFor={id('goods')} className="visually-hidden">
+              Marchandises
+            </label>
+            <input
+              id={id('goods')}
+              type="text"
+              className="form-control"
+              placeholder="Marchandises"
+              value={draft.goods}
+              onChange={(e) => set('goods', e.target.value)}
+            />
+            <input
+              type="number"
+              className="form-control flex-grow-0"
+              style={{ width: '5.5rem' }}
+              step="0.01"
+              inputMode="decimal"
+              placeholder="0,00"
+              aria-label="Facturé marchandise"
+              value={draft.goodsAmount}
+              onChange={(e) => set('goodsAmount', e.target.value)}
+            />
+            <span className="input-group-text">€</span>
+          </div>
         </div>
 
-        <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor={id('goods')} className="form-label">
-            Marchandises
-          </label>
-          <input
-            id={id('goods')}
-            type="text"
-            className="form-control"
-            value={draft.goods}
-            onChange={(e) => set('goods', e.target.value)}
-          />
-        </div>
-
-        <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor={id('goods-amount')} className="form-label">
-            Facturé marchandise
-          </label>
-          <input
-            id={id('goods-amount')}
-            type="number"
-            className="form-control"
-            step="0.01"
-            inputMode="decimal"
-            value={draft.goodsAmount}
-            onChange={(e) => set('goodsAmount', e.target.value)}
-          />
-        </div>
-
-        <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor={id('payment')} className="form-label">
+        <div className="col-6 col-lg-2">
+          <label htmlFor={id('payment')} className="visually-hidden">
             Type de paiement
           </label>
           <input
             id={id('payment')}
             type="text"
-            className="form-control"
+            className="form-control form-control-sm"
             list={id('payment-types')}
+            placeholder="Paiement"
             value={draft.paymentType}
             onChange={(e) => set('paymentType', e.target.value)}
           />
@@ -247,34 +252,39 @@ export function TransactionForm({
           </datalist>
         </div>
 
-        <div className="col-12">
-          <label htmlFor={id('notes')} className="form-label">
+        <div className="col-6 col-lg">
+          <label htmlFor={id('notes')} className="visually-hidden">
             Notes
           </label>
-          <textarea
+          <input
             id={id('notes')}
-            className="form-control"
-            rows={2}
+            type="text"
+            className="form-control form-control-sm"
+            placeholder="Notes"
             value={draft.notes}
             onChange={(e) => set('notes', e.target.value)}
           />
         </div>
-      </div>
 
-      <div className="d-flex gap-2 mt-3">
-        <button type="submit" className="btn btn-primary" disabled={busy}>
-          {busy ? 'Enregistrement…' : editing ? 'Mettre à jour' : 'Ajouter'}
-        </button>
-        {editing && onCancel && (
+        <div className="col-12 col-lg-auto d-flex gap-2">
           <button
-            type="button"
-            className="btn btn-outline-secondary"
-            onClick={onCancel}
+            type="submit"
+            className="btn btn-sm btn-primary"
             disabled={busy}
           >
-            Annuler
+            {busy ? 'Enregistrement…' : editing ? 'Mettre à jour' : 'Ajouter'}
           </button>
-        )}
+          {editing && onCancel && (
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-secondary"
+              onClick={onCancel}
+              disabled={busy}
+            >
+              Annuler
+            </button>
+          )}
+        </div>
       </div>
     </form>
   )
