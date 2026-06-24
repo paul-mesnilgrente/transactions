@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // Repo is served at https://paul-mesnilgrente.github.io/transactions/
-  base: '/transactions/',
+  // Served at the root of the custom domain https://compta.beekuty.fr/
+  base: '/',
   plugins: [react()],
 })
