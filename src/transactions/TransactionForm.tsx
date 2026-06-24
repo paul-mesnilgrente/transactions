@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import type { Transaction, TransactionRecord } from '../sheets/transaction'
 
-const PAYMENT_TYPES = ['Carte', 'Espèces', 'Virement', 'Chèque']
+const PAYMENT_TYPES = ['CB', 'ESP', 'VIR', 'Chèque']
 
 // The form keeps every field as a string (what inputs give us) and converts
 // to a Transaction on submit.
