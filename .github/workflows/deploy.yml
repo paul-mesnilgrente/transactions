@@ -30,6 +30,12 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+        env:
+          # These VITE_* values are inlined into the public bundle, so they
+          # live as repository Variables (Settings → Secrets and variables →
+          # Actions → Variables), not Secrets.
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+          VITE_SPREADSHEET_ID: ${{ vars.VITE_SPREADSHEET_ID }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
