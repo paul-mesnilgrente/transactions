@@ -84,22 +84,14 @@ export function TransactionsPage() {
     [clients, addClient],
   )
 
-  const handleSubmit = useCallback(
+  const handleAdd = useCallback(
     async (draft: Transaction): Promise<boolean> => {
       setSaving(true)
       setError(null)
       try {
         await ensureClient(draft.client)
-        if (editing) {
-          const updated = await update({ ...draft, row: editing.row })
-          setTransactions((prev) =>
-            prev.map((t) => (t.row === updated.row ? updated : t)),
-          )
-          setEditing(null)
-        } else {
-          const added = await add(draft)
-          setTransactions((prev) => [...prev, added])
-        }
+        const added = await add(draft)
+        setTransactions((prev) => [...prev, added])
         return true
       } catch (e) {
         setError(errorMessage(e))
@@ -108,7 +100,30 @@ export function TransactionsPage() {
         setSaving(false)
       }
     },
-    [add, update, editing, ensureClient],
+    [add, ensureClient],
+  )
+
+  const handleUpdate = useCallback(
+    async (draft: Transaction): Promise<boolean> => {
+      if (!editing) return false
+      setSaving(true)
+      setError(null)
+      try {
+        await ensureClient(draft.client)
+        const updated = await update({ ...draft, row: editing.row })
+        setTransactions((prev) =>
+          prev.map((t) => (t.row === updated.row ? updated : t)),
+        )
+        setEditing(null)
+        return true
+      } catch (e) {
+        setError(errorMessage(e))
+        return false
+      } finally {
+        setSaving(false)
+      }
+    },
+    [editing, update, ensureClient],
   )
 
   const confirmDelete = useCallback(async () => {
@@ -148,14 +163,6 @@ export function TransactionsPage() {
 
   return (
     <section className="transactions">
-      <TransactionForm
-        initial={editing}
-        clients={clients}
-        onSubmit={handleSubmit}
-        onCancel={() => setEditing(null)}
-        busy={saving}
-      />
-
       {error && (
         <div className="alert alert-danger" role="alert">
           {error}
@@ -191,6 +198,14 @@ export function TransactionsPage() {
         <strong>{money.format(filteredTotals.total)}</strong>
       </p>
 
+      {/* Always-present draft at the top of the list — adding is the most
+          common action, so the form is permanently ready. */}
+      <TransactionForm
+        clients={clients}
+        onSubmit={handleAdd}
+        busy={saving && editing == null}
+      />
+
       {loading && transactions.length === 0 ? (
         <p>Chargement…</p>
       ) : (
@@ -199,6 +214,19 @@ export function TransactionsPage() {
           onEdit={setEditing}
           onDelete={setDeleting}
           editingRow={editing?.row}
+          editor={
+            editing && (
+              <TransactionForm
+                key={editing.row}
+                initial={editing}
+                clients={clients}
+                autoFocus
+                onSubmit={handleUpdate}
+                onCancel={() => setEditing(null)}
+                busy={saving}
+              />
+            )
+          }
         />
       )}
 

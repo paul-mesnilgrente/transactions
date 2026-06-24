@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import type { Transaction, TransactionRecord } from '../sheets/transaction'
 
 const PAYMENT_TYPES = ['CB', 'ESP', 'VIR', 'Chèque']
@@ -75,6 +75,8 @@ interface Props {
   initial?: TransactionRecord | null
   /** Known client names, shown as autocomplete suggestions. */
   clients?: string[]
+  /** Scroll the form into view and focus the first field on mount. */
+  autoFocus?: boolean
   /** Persist the transaction. Resolve true on success so the form can reset. */
   onSubmit: (transaction: Transaction) => Promise<boolean>
   onCancel?: () => void
@@ -84,6 +86,7 @@ interface Props {
 export function TransactionForm({
   initial,
   clients = [],
+  autoFocus,
   onSubmit,
   onCancel,
   busy,
@@ -91,9 +94,23 @@ export function TransactionForm({
   const [draft, setDraft] = useState<Draft>(emptyDraft)
   const editing = initial != null
 
+  // Unique ids so multiple forms (top "add" + inline "edit") can coexist.
+  const uid = useId()
+  const id = (name: string) => `${uid}-${name}`
+
+  const formRef = useRef<HTMLFormElement>(null)
+
   useEffect(() => {
     setDraft(initial ? fromRecord(initial) : emptyDraft())
   }, [initial])
+
+  useEffect(() => {
+    if (!autoFocus) return
+    const node = formRef.current
+    if (!node) return
+    node.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    node.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true })
+  }, [autoFocus])
 
   function set<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }))
@@ -106,18 +123,22 @@ export function TransactionForm({
   }
 
   return (
-    <form className="card card-body shadow-sm mb-4" onSubmit={handleSubmit}>
+    <form
+      ref={formRef}
+      className="card card-body shadow-sm mb-4"
+      onSubmit={handleSubmit}
+    >
       <h2 className="h5 mb-3">
         {editing ? 'Modifier la transaction' : 'Nouvelle transaction'}
       </h2>
 
       <div className="row g-3">
         <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor="tx-date" className="form-label">
+          <label htmlFor={id('date')} className="form-label">
             Date
           </label>
           <input
-            id="tx-date"
+            id={id('date')}
             type="text"
             className="form-control"
             inputMode="numeric"
@@ -131,20 +152,20 @@ export function TransactionForm({
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor="tx-client" className="form-label">
+          <label htmlFor={id('client')} className="form-label">
             Client
           </label>
           <input
-            id="tx-client"
+            id={id('client')}
             type="text"
             className="form-control"
-            list="clients-list"
+            list={id('clients-list')}
             autoComplete="off"
             placeholder="Choisir ou créer…"
             value={draft.client}
             onChange={(e) => set('client', e.target.value)}
           />
-          <datalist id="clients-list">
+          <datalist id={id('clients-list')}>
             {clients.map((c) => (
               <option key={c} value={c} />
             ))}
@@ -152,11 +173,11 @@ export function TransactionForm({
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor="tx-services" className="form-label">
+          <label htmlFor={id('services')} className="form-label">
             Prestations
           </label>
           <input
-            id="tx-services"
+            id={id('services')}
             type="text"
             className="form-control"
             value={draft.services}
@@ -165,11 +186,11 @@ export function TransactionForm({
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor="tx-services-amount" className="form-label">
+          <label htmlFor={id('services-amount')} className="form-label">
             Facturé prestation
           </label>
           <input
-            id="tx-services-amount"
+            id={id('services-amount')}
             type="number"
             className="form-control"
             step="0.01"
@@ -180,11 +201,11 @@ export function TransactionForm({
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor="tx-goods" className="form-label">
+          <label htmlFor={id('goods')} className="form-label">
             Marchandises
           </label>
           <input
-            id="tx-goods"
+            id={id('goods')}
             type="text"
             className="form-control"
             value={draft.goods}
@@ -193,11 +214,11 @@ export function TransactionForm({
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor="tx-goods-amount" className="form-label">
+          <label htmlFor={id('goods-amount')} className="form-label">
             Facturé marchandise
           </label>
           <input
-            id="tx-goods-amount"
+            id={id('goods-amount')}
             type="number"
             className="form-control"
             step="0.01"
@@ -208,18 +229,18 @@ export function TransactionForm({
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <label htmlFor="tx-payment" className="form-label">
+          <label htmlFor={id('payment')} className="form-label">
             Type de paiement
           </label>
           <input
-            id="tx-payment"
+            id={id('payment')}
             type="text"
             className="form-control"
-            list="payment-types"
+            list={id('payment-types')}
             value={draft.paymentType}
             onChange={(e) => set('paymentType', e.target.value)}
           />
-          <datalist id="payment-types">
+          <datalist id={id('payment-types')}>
             {PAYMENT_TYPES.map((p) => (
               <option key={p} value={p} />
             ))}
@@ -227,11 +248,11 @@ export function TransactionForm({
         </div>
 
         <div className="col-12">
-          <label htmlFor="tx-notes" className="form-label">
+          <label htmlFor={id('notes')} className="form-label">
             Notes
           </label>
           <textarea
-            id="tx-notes"
+            id={id('notes')}
             className="form-control"
             rows={2}
             value={draft.notes}

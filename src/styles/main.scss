@@ -41,6 +41,34 @@ $link-color: $night-rider;
   gap: 0.4rem;
 }
 
+// Inline edit panel: expands under the row being edited.
+.tx-edit-row > td {
+  background: transparent;
+}
+
+// Don't apply the hover tint to the editor row.
+.table-hover > tbody > tr.tx-edit-row:hover > * {
+  --bs-table-bg-state: transparent;
+}
+
+.tx-edit-panel {
+  overflow: hidden;
+  animation: tx-edit-open 0.28s ease;
+}
+
+@keyframes tx-edit-open {
+  from {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    max-height: 80rem;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 // On phones the table becomes one card per transaction (no horizontal scroll).
 // Each cell shows its column label, and blank fields are hidden for a summary.
 @media (max-width: 640px) {
@@ -106,5 +134,21 @@ $link-color: $night-rider;
 
   .tx-table td.actions-cell .row-actions .btn {
     flex: 1;
+  }
+
+  // The editor row is just a container for the form card — no card chrome.
+  .tx-table tbody tr.tx-edit-row {
+    border: none;
+    padding: 0;
+    margin-bottom: 0.75rem;
+  }
+
+  .tx-table tbody tr.tx-edit-row > td {
+    display: block;
+    padding: 0;
+  }
+
+  .tx-table tbody tr.tx-edit-row > td::before {
+    content: none;
   }
 }

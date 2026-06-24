@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react'
 import type { TransactionRecord } from '../sheets/transaction'
 
 const money = new Intl.NumberFormat('fr-FR', {
@@ -22,6 +23,8 @@ interface Props {
   onEdit: (transaction: TransactionRecord) => void
   onDelete: (transaction: TransactionRecord) => void
   editingRow?: number
+  /** Editor that replaces the row being edited (morph in place). */
+  editor?: ReactNode
 }
 
 export function TransactionsTable({
@@ -29,6 +32,7 @@ export function TransactionsTable({
   onEdit,
   onDelete,
   editingRow,
+  editor,
 }: Props) {
   if (transactions.length === 0) {
     return (
@@ -54,13 +58,21 @@ export function TransactionsTable({
         </thead>
         <tbody>
           {transactions.map((t) => {
+            // The row being edited is replaced by the form (morph in place).
+            if (t.row === editingRow && editor) {
+              return (
+                <tr key={t.row} className="tx-edit-row">
+                  <td colSpan={9} className="p-0 border-0">
+                    <div className="tx-edit-panel">{editor}</div>
+                  </td>
+                </tr>
+              )
+            }
+
             const services = formatAmount(t.servicesAmount)
             const goods = formatAmount(t.goodsAmount)
             return (
-              <tr
-                key={t.row}
-                className={t.row === editingRow ? 'editing' : undefined}
-              >
+              <tr key={t.row}>
                 <td data-label="Date" className={cellClass(t.date)}>
                   {t.date}
                 </td>
