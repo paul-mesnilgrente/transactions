@@ -184,3 +184,71 @@
 .tx-table tbody tr:hover {
   background: #f7f7f7;
 }
+
+/* On phones the table becomes one card per transaction, so there's no
+   horizontal scroll. Each cell shows its column label and blank cells hide. */
+@media (max-width: 640px) {
+  .table-wrap {
+    overflow-x: visible;
+  }
+
+  .tx-table,
+  .tx-table tbody,
+  .tx-table tr,
+  .tx-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .tx-table thead {
+    display: none;
+  }
+
+  .tx-table tr {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tx-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+    border: none;
+    white-space: normal;
+    text-align: right;
+  }
+
+  /* Column label, taken from the cell's data-label attribute. */
+  .tx-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #666;
+    text-align: left;
+  }
+
+  /* Hide blank fields to keep each card to a summary. */
+  .tx-table td.empty {
+    display: none;
+  }
+
+  .tx-table td[data-label='Client'] {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .tx-table td.actions-cell {
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+  }
+
+  .tx-table td.actions-cell::before {
+    content: none;
+  }
+
+  .tx-table td.actions-cell button {
+    width: 100%;
+  }
+}

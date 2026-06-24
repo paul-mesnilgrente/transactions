@@ -9,6 +9,14 @@ function formatAmount(value: number | null): string {
   return value == null ? '' : money.format(value)
 }
 
+/** Combine a base class with `empty` so blank cells can be hidden on mobile. */
+function cellClass(value: string, base = ''): string | undefined {
+  const classes = [base, value.trim() === '' ? 'empty' : '']
+    .filter(Boolean)
+    .join(' ')
+  return classes || undefined
+}
+
 interface Props {
   transactions: TransactionRecord[]
   onEdit: (transaction: TransactionRecord) => void
@@ -37,23 +45,52 @@ export function TransactionsTable({ transactions, onEdit, editingRow }: Props) {
           </tr>
         </thead>
         <tbody>
-          {transactions.map((t) => (
-            <tr key={t.row} className={t.row === editingRow ? 'editing' : undefined}>
-              <td>{t.date}</td>
-              <td>{t.client}</td>
-              <td>{t.services}</td>
-              <td className="num">{formatAmount(t.servicesAmount)}</td>
-              <td>{t.goods}</td>
-              <td className="num">{formatAmount(t.goodsAmount)}</td>
-              <td>{t.paymentType}</td>
-              <td>{t.notes}</td>
-              <td>
-                <button type="button" onClick={() => onEdit(t)}>
-                  Modifier
-                </button>
-              </td>
-            </tr>
-          ))}
+          {transactions.map((t) => {
+            const services = formatAmount(t.servicesAmount)
+            const goods = formatAmount(t.goodsAmount)
+            return (
+              <tr
+                key={t.row}
+                className={t.row === editingRow ? 'editing' : undefined}
+              >
+                <td data-label="Date" className={cellClass(t.date)}>
+                  {t.date}
+                </td>
+                <td data-label="Client" className={cellClass(t.client)}>
+                  {t.client}
+                </td>
+                <td data-label="Prestations" className={cellClass(t.services)}>
+                  {t.services}
+                </td>
+                <td
+                  data-label="Facturé prestation"
+                  className={cellClass(services, 'num')}
+                >
+                  {services}
+                </td>
+                <td data-label="Marchandises" className={cellClass(t.goods)}>
+                  {t.goods}
+                </td>
+                <td
+                  data-label="Facturé marchandise"
+                  className={cellClass(goods, 'num')}
+                >
+                  {goods}
+                </td>
+                <td data-label="Paiement" className={cellClass(t.paymentType)}>
+                  {t.paymentType}
+                </td>
+                <td data-label="Notes" className={cellClass(t.notes)}>
+                  {t.notes}
+                </td>
+                <td className="actions-cell">
+                  <button type="button" onClick={() => onEdit(t)}>
+                    Modifier
+                  </button>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>
