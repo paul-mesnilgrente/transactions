@@ -1,12 +1,27 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSheets } from '../sheets/useSheets'
 import type { Transaction, TransactionRecord } from '../sheets/transaction'
 import { TransactionForm } from './TransactionForm'
+import { TransactionFilters } from './TransactionFilters'
 import { TransactionsTable } from './TransactionsTable'
+import {
+  applyFilters,
+  clientsIn,
+  defaultFilters,
+  normalizeFilters,
+  totalBilled,
+  yearsIn,
+  type Filters,
+} from './filtering'
 
 function errorMessage(e: unknown): string {
   return e instanceof Error ? e.message : 'Une erreur est survenue'
 }
+
+const money = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'EUR',
+})
 
 export function TransactionsPage() {
   const { list, add, update, clients: fetchClients, addClient } = useSheets()
@@ -17,6 +32,7 @@ export function TransactionsPage() {
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState<TransactionRecord | null>(null)
   const [saving, setSaving] = useState(false)
+  const [filters, setFilters] = useState<Filters>(defaultFilters)
 
   const reload = useCallback(async () => {
     setLoading(true)
@@ -85,6 +101,14 @@ export function TransactionsPage() {
     [add, update, editing, ensureClient],
   )
 
+  const clientOptions = useMemo(() => clientsIn(transactions), [transactions])
+  const yearOptions = useMemo(() => yearsIn(transactions), [transactions])
+  const filtered = useMemo(
+    () => applyFilters(transactions, filters),
+    [transactions, filters],
+  )
+  const filteredTotal = useMemo(() => totalBilled(filtered), [filtered])
+
   return (
     <section className="transactions">
       <TransactionForm
@@ -104,11 +128,25 @@ export function TransactionsPage() {
         </button>
       </div>
 
+      <TransactionFilters
+        filters={filters}
+        onChange={(f) => setFilters(normalizeFilters(f))}
+        onReset={() => setFilters(defaultFilters())}
+        clientOptions={clientOptions}
+        yearOptions={yearOptions}
+      />
+
+      <p className="summary">
+        {filtered.length} / {transactions.length} transaction
+        {transactions.length > 1 ? 's' : ''} · Total facturé&nbsp;:{' '}
+        <strong>{money.format(filteredTotal)}</strong>
+      </p>
+
       {loading && transactions.length === 0 ? (
         <p>Chargement…</p>
       ) : (
         <TransactionsTable
-          transactions={transactions}
+          transactions={filtered}
           onEdit={setEditing}
           editingRow={editing?.row}
         />
