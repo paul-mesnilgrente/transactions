@@ -16,8 +16,12 @@ interface Draft {
   notes: string
 }
 
+// Day-first French format (JJ/MM/AAAA), matching the spreadsheet.
 function today(): string {
-  return new Date().toISOString().slice(0, 10)
+  const d = new Date()
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  return `${day}/${month}/${d.getFullYear()}`
 }
 
 function emptyDraft(): Draft {
@@ -55,7 +59,7 @@ function parseAmount(value: string): number | null {
 
 function toTransaction(d: Draft): Transaction {
   return {
-    date: d.date,
+    date: d.date.trim(),
     client: d.client.trim(),
     services: d.services.trim(),
     servicesAmount: parseAmount(d.servicesAmount),
@@ -109,7 +113,11 @@ export function TransactionForm({
         <label>
           Date
           <input
-            type="date"
+            type="text"
+            inputMode="numeric"
+            placeholder="JJ/MM/AAAA"
+            pattern="\d{1,2}/\d{1,2}/\d{4}"
+            title="Format attendu : JJ/MM/AAAA"
             value={draft.date}
             onChange={(e) => set('date', e.target.value)}
             required
