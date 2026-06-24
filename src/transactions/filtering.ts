@@ -135,10 +135,22 @@ export function applyFilters(
   })
 }
 
-/** Sum of all billed amounts (services + goods) over the given rows. */
-export function totalBilled(rows: TransactionRecord[]): number {
-  return rows.reduce(
-    (sum, t) => sum + (t.servicesAmount ?? 0) + (t.goodsAmount ?? 0),
-    0,
-  )
+export interface Totals {
+  /** Sum of "Facturé prestation". */
+  services: number
+  /** Sum of "Facturé marchandise". */
+  goods: number
+  /** services + goods. */
+  total: number
+}
+
+/** Sum the billed amounts over the given rows, split by services and goods. */
+export function totals(rows: TransactionRecord[]): Totals {
+  let services = 0
+  let goods = 0
+  for (const t of rows) {
+    services += t.servicesAmount ?? 0
+    goods += t.goodsAmount ?? 0
+  }
+  return { services, goods, total: services + goods }
 }

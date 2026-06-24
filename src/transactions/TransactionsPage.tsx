@@ -9,7 +9,7 @@ import {
   clientsIn,
   defaultFilters,
   normalizeFilters,
-  totalBilled,
+  totals,
   yearsIn,
   type Filters,
 } from './filtering'
@@ -107,7 +107,7 @@ export function TransactionsPage() {
     () => applyFilters(transactions, filters),
     [transactions, filters],
   )
-  const filteredTotal = useMemo(() => totalBilled(filtered), [filtered])
+  const filteredTotals = useMemo(() => totals(filtered), [filtered])
 
   return (
     <section className="transactions">
@@ -138,8 +138,11 @@ export function TransactionsPage() {
 
       <p className="summary">
         {filtered.length} / {transactions.length} transaction
-        {transactions.length > 1 ? 's' : ''} · Total facturé&nbsp;:{' '}
-        <strong>{money.format(filteredTotal)}</strong>
+        {transactions.length > 1 ? 's' : ''} · Prestations&nbsp;:{' '}
+        <strong>{money.format(filteredTotals.services)}</strong> ·
+        Marchandises&nbsp;:{' '}
+        <strong>{money.format(filteredTotals.goods)}</strong> · Total&nbsp;:{' '}
+        <strong>{money.format(filteredTotals.total)}</strong>
       </p>
 
       {loading && transactions.length === 0 ? (
