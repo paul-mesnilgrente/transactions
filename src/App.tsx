@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useAuth } from './auth/auth-context'
 import { ProduitsPage } from './produits/ProduitsPage'
 import { ChargesPage } from './charges/ChargesPage'
+import { ResumePage } from './resume/ResumePage'
 
-type Page = 'produits' | 'charges'
+type Page = 'produits' | 'charges' | 'resume'
 
 function App() {
   const { ready, restoring, user, signIn, signOut } = useAuth()
@@ -40,8 +41,12 @@ function App() {
                 </button>
               </li>
               <li className="nav-item">
-                {/* Placeholder — page à venir */}
-                <button type="button" className="nav-link" disabled>
+                <button
+                  type="button"
+                  className={`nav-link ${page === 'resume' ? 'active' : ''}`}
+                  aria-current={page === 'resume' ? 'page' : undefined}
+                  onClick={() => setPage('resume')}
+                >
                   Résumé
                 </button>
               </li>
@@ -87,7 +92,14 @@ function App() {
         </button>
       )}
 
-      {user && (page === 'charges' ? <ChargesPage /> : <ProduitsPage />)}
+      {user &&
+        (page === 'charges' ? (
+          <ChargesPage />
+        ) : page === 'resume' ? (
+          <ResumePage />
+        ) : (
+          <ProduitsPage />
+        ))}
     </main>
   )
 }
