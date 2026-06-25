@@ -1,8 +1,13 @@
+import { useState } from 'react'
 import { useAuth } from './auth/auth-context'
 import { ProduitsPage } from './produits/ProduitsPage'
+import { ChargesPage } from './charges/ChargesPage'
+
+type Page = 'produits' | 'charges'
 
 function App() {
   const { ready, restoring, user, signIn, signOut } = useAuth()
+  const [page, setPage] = useState<Page>('produits')
 
   return (
     <main className="container py-4">
@@ -15,13 +20,22 @@ function App() {
           {user && (
             <ul className="nav nav-pills">
               <li className="nav-item">
-                <span className="nav-link active" aria-current="page">
+                <button
+                  type="button"
+                  className={`nav-link ${page === 'produits' ? 'active' : ''}`}
+                  aria-current={page === 'produits' ? 'page' : undefined}
+                  onClick={() => setPage('produits')}
+                >
                   Produits
-                </span>
+                </button>
               </li>
               <li className="nav-item">
-                {/* Placeholder — page à venir */}
-                <button type="button" className="nav-link" disabled>
+                <button
+                  type="button"
+                  className={`nav-link ${page === 'charges' ? 'active' : ''}`}
+                  aria-current={page === 'charges' ? 'page' : undefined}
+                  onClick={() => setPage('charges')}
+                >
                   Charges
                 </button>
               </li>
@@ -73,7 +87,7 @@ function App() {
         </button>
       )}
 
-      {user && <ProduitsPage />}
+      {user && (page === 'charges' ? <ChargesPage /> : <ProduitsPage />)}
     </main>
   )
 }

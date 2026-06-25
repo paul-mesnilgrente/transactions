@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import type { ProduitRecord } from '../sheets/produit'
+import type { ChargeRecord } from './charge'
 import { RefreshButton } from '../components/RefreshButton'
 
 const money = new Intl.NumberFormat('fr-FR', {
@@ -20,9 +20,9 @@ function cellClass(value: string, base = ''): string | undefined {
 }
 
 interface Props {
-  produits: ProduitRecord[]
-  onEdit: (produit: ProduitRecord) => void
-  onDelete: (produit: ProduitRecord) => void
+  charges: ChargeRecord[]
+  onEdit: (charge: ChargeRecord) => void
+  onDelete: (charge: ChargeRecord) => void
   onReload: () => void
   loading?: boolean
   editingRow?: number
@@ -30,8 +30,8 @@ interface Props {
   editor?: ReactNode
 }
 
-export function ProduitsTable({
-  produits,
+export function ChargesTable({
+  charges,
   onEdit,
   onDelete,
   onReload,
@@ -45,11 +45,10 @@ export function ProduitsTable({
         <thead>
           <tr>
             <th>Date</th>
-            <th>Client</th>
-            <th>Prestations</th>
-            <th className="num">€</th>
-            <th>Marchandises</th>
-            <th className="num">€</th>
+            <th>Fournisseur</th>
+            <th>Catégorie</th>
+            <th>Libellé</th>
+            <th className="num">Montant</th>
             <th>Paiement</th>
             <th>Notes</th>
             <th className="text-end">
@@ -58,72 +57,61 @@ export function ProduitsTable({
           </tr>
         </thead>
         <tbody>
-          {produits.length === 0 && (
+          {charges.length === 0 && (
             <tr className="tx-empty-row">
-              <td colSpan={9} className="text-body-secondary py-3">
-                Aucun produit pour l'instant.
+              <td colSpan={8} className="text-body-secondary py-3">
+                Aucune charge pour l'instant.
               </td>
             </tr>
           )}
-          {produits.map((t) => {
-            // The row being edited is replaced by the form (morph in place).
-            if (t.row === editingRow && editor) {
+          {charges.map((c) => {
+            if (c.row === editingRow && editor) {
               return (
-                <tr key={t.row} className="tx-edit-row">
-                  <td colSpan={9} className="p-0 border-0">
+                <tr key={c.row} className="tx-edit-row">
+                  <td colSpan={8} className="p-0 border-0">
                     <div className="tx-edit-panel">{editor}</div>
                   </td>
                 </tr>
               )
             }
 
-            const services = formatAmount(t.servicesAmount)
-            const goods = formatAmount(t.goodsAmount)
+            const amount = formatAmount(c.amount)
             return (
-              <tr key={t.row}>
-                <td data-label="Date" className={cellClass(t.date)}>
-                  {t.date}
+              <tr key={c.row}>
+                <td data-label="Date" className={cellClass(c.date)}>
+                  {c.date}
                 </td>
-                <td data-label="Client" className={cellClass(t.client)}>
-                  {t.client}
+                <td data-label="Fournisseur" className={cellClass(c.supplier)}>
+                  {c.supplier}
                 </td>
-                <td data-label="Prestations" className={cellClass(t.services)}>
-                  {t.services}
+                <td data-label="Catégorie" className={cellClass(c.category)}>
+                  {c.category}
                 </td>
-                <td
-                  data-label="Facturé prestation"
-                  className={cellClass(services, 'num')}
-                >
-                  {services}
+                <td data-label="Libellé" className={cellClass(c.label)}>
+                  {c.label}
                 </td>
-                <td data-label="Marchandises" className={cellClass(t.goods)}>
-                  {t.goods}
+                <td data-label="Montant" className={cellClass(amount, 'num')}>
+                  {amount}
                 </td>
-                <td
-                  data-label="Facturé marchandise"
-                  className={cellClass(goods, 'num')}
-                >
-                  {goods}
+                <td data-label="Paiement" className={cellClass(c.paymentType)}>
+                  {c.paymentType}
                 </td>
-                <td data-label="Paiement" className={cellClass(t.paymentType)}>
-                  {t.paymentType}
-                </td>
-                <td data-label="Notes" className={cellClass(t.notes)}>
-                  {t.notes}
+                <td data-label="Notes" className={cellClass(c.notes)}>
+                  {c.notes}
                 </td>
                 <td className="actions-cell text-end">
                   <div className="row-actions justify-content-end">
                     <button
                       type="button"
                       className="btn btn-sm btn-outline-secondary"
-                      onClick={() => onEdit(t)}
+                      onClick={() => onEdit(c)}
                     >
                       Modifier
                     </button>
                     <button
                       type="button"
                       className="btn btn-sm btn-outline-danger"
-                      onClick={() => onDelete(t)}
+                      onClick={() => onDelete(c)}
                     >
                       Supprimer
                     </button>

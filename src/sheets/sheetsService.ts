@@ -2,7 +2,13 @@
 // Each function takes an OAuth access token (from the auth layer) and talks
 // directly to Sheets — no backend involved.
 
-import { a1Range, sheetsFetch, VALUE_INPUT, type ValueRange } from './api'
+import {
+  a1Range,
+  getSheetId,
+  sheetsFetch,
+  VALUE_INPUT,
+  type ValueRange,
+} from './api'
 import {
   COLUMN_SPAN,
   FIRST_DATA_ROW,
@@ -12,29 +18,6 @@ import {
   type Produit,
   type ProduitRecord,
 } from './produit'
-
-// The numeric sheetId (needed for row deletion) never changes, so cache it.
-let cachedSheetId: number | null = null
-
-interface SpreadsheetMeta {
-  sheets: { properties: { sheetId: number; title: string } }[]
-}
-
-/** Resolve the numeric ID of the configured tab (or the first sheet). */
-async function getSheetId(token: string): Promise<number> {
-  if (cachedSheetId != null) return cachedSheetId
-  const fields = encodeURIComponent('sheets(properties(sheetId,title))')
-  const data = await sheetsFetch<SpreadsheetMeta>(`?fields=${fields}`, token)
-  const sheets = data.sheets ?? []
-  const match = SHEET_NAME
-    ? sheets.find((s) => s.properties.title === SHEET_NAME)
-    : sheets[0]
-  if (!match) {
-    throw new Error(`Onglet introuvable : ${SHEET_NAME || '(premier)'}`)
-  }
-  cachedSheetId = match.properties.sheetId
-  return cachedSheetId
-}
 
 /** Read every produit row from the sheet. */
 export async function listProduits(
@@ -98,7 +81,7 @@ export async function deleteProduit(
   token: string,
   row: number,
 ): Promise<void> {
-  const sheetId = await getSheetId(token)
+  const sheetId = await getSheetId(token, SHEET_NAME)
   await sheetsFetch(':batchUpdate', token, {
     method: 'POST',
     body: JSON.stringify({

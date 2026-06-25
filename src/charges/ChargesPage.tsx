@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useSheets } from '../sheets/useSheets'
-import type { Produit, ProduitRecord } from '../sheets/produit'
+import { useCharges } from './useCharges'
+import type { Charge, ChargeRecord } from './charge'
 import { ConfirmDialog } from '../components/ConfirmDialog'
-import { ProduitForm } from './ProduitForm'
-import { ProduitFilters } from './ProduitFilters'
-import { ProduitsTable } from './ProduitsTable'
+import { ChargeForm } from './ChargeForm'
+import { ChargeFilters } from './ChargeFilters'
+import { ChargesTable } from './ChargesTable'
 import {
   applyFilters,
-  clientsIn,
+  categoriesIn,
   defaultFilters,
   normalizeFilters,
-  totals,
+  suppliersIn,
+  totalAmount,
   yearsIn,
   type Filters,
 } from './filtering'
@@ -24,23 +25,15 @@ const money = new Intl.NumberFormat('fr-FR', {
   currency: 'EUR',
 })
 
-export function ProduitsPage() {
-  const {
-    list,
-    add,
-    update,
-    remove,
-    clients: fetchClients,
-    addClient,
-  } = useSheets()
+export function ChargesPage() {
+  const { list, add, update, remove } = useCharges()
 
-  const [produits, setProduits] = useState<ProduitRecord[]>([])
-  const [clients, setClients] = useState<string[]>([])
+  const [charges, setCharges] = useState<ChargeRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editing, setEditing] = useState<ProduitRecord | null>(null)
+  const [editing, setEditing] = useState<ChargeRecord | null>(null)
   const [saving, setSaving] = useState(false)
-  const [deleting, setDeleting] = useState<ProduitRecord | null>(null)
+  const [deleting, setDeleting] = useState<ChargeRecord | null>(null)
   const [deletingBusy, setDeletingBusy] = useState(false)
   const [filters, setFilters] = useState<Filters>(defaultFilters)
 
@@ -48,7 +41,7 @@ export function ProduitsPage() {
     setLoading(true)
     setError(null)
     try {
-      setProduits(await list())
+      setCharges(await list())
     } catch (e) {
       setError(errorMessage(e))
     } finally {
@@ -60,38 +53,13 @@ export function ProduitsPage() {
     void reload()
   }, [reload])
 
-  // Client list is best-effort: a missing Clients tab shouldn't block the page.
-  useEffect(() => {
-    fetchClients()
-      .then(setClients)
-      .catch(() => undefined)
-  }, [fetchClients])
-
-  // Create the client in the Clients tab if it's a name we haven't seen yet.
-  const ensureClient = useCallback(
-    async (name: string) => {
-      const trimmed = name.trim()
-      if (!trimmed) return
-      const exists = clients.some(
-        (c) => c.toLowerCase() === trimmed.toLowerCase(),
-      )
-      if (exists) return
-      await addClient(trimmed)
-      setClients((prev) =>
-        [...prev, trimmed].sort((a, b) => a.localeCompare(b, 'fr')),
-      )
-    },
-    [clients, addClient],
-  )
-
   const handleAdd = useCallback(
-    async (draft: Produit): Promise<boolean> => {
+    async (draft: Charge): Promise<boolean> => {
       setSaving(true)
       setError(null)
       try {
-        await ensureClient(draft.client)
         const added = await add(draft)
-        setProduits((prev) => [...prev, added])
+        setCharges((prev) => [...prev, added])
         return true
       } catch (e) {
         setError(errorMessage(e))
@@ -100,19 +68,18 @@ export function ProduitsPage() {
         setSaving(false)
       }
     },
-    [add, ensureClient],
+    [add],
   )
 
   const handleUpdate = useCallback(
-    async (draft: Produit): Promise<boolean> => {
+    async (draft: Charge): Promise<boolean> => {
       if (!editing) return false
       setSaving(true)
       setError(null)
       try {
-        await ensureClient(draft.client)
         const updated = await update({ ...draft, row: editing.row })
-        setProduits((prev) =>
-          prev.map((t) => (t.row === updated.row ? updated : t)),
+        setCharges((prev) =>
+          prev.map((c) => (c.row === updated.row ? updated : c)),
         )
         setEditing(null)
         return true
@@ -123,7 +90,7 @@ export function ProduitsPage() {
         setSaving(false)
       }
     },
-    [editing, update, ensureClient],
+    [editing, update],
   )
 
   const confirmDelete = useCallback(async () => {
@@ -134,10 +101,10 @@ export function ProduitsPage() {
     try {
       await remove(deletedRow)
       // Deleting a row shifts every later row up by one, so renumber state.
-      setProduits((prev) =>
+      setCharges((prev) =>
         prev
-          .filter((t) => t.row !== deletedRow)
-          .map((t) => (t.row > deletedRow ? { ...t, row: t.row - 1 } : t)),
+          .filter((c) => c.row !== deletedRow)
+          .map((c) => (c.row > deletedRow ? { ...c, row: c.row - 1 } : c)),
       )
       setEditing((cur) => {
         if (!cur) return cur
@@ -152,53 +119,51 @@ export function ProduitsPage() {
     }
   }, [deleting, remove])
 
-  const clientOptions = useMemo(() => clientsIn(produits), [produits])
-  const yearOptions = useMemo(() => yearsIn(produits), [produits])
+  const categoryOptions = useMemo(() => categoriesIn(charges), [charges])
+  const supplierOptions = useMemo(() => suppliersIn(charges), [charges])
+  const yearOptions = useMemo(() => yearsIn(charges), [charges])
   const filtered = useMemo(
     // Most recent first (rows are appended chronologically to the sheet).
-    () => applyFilters(produits, filters).reverse(),
-    [produits, filters],
+    () => applyFilters(charges, filters).reverse(),
+    [charges, filters],
   )
-  const filteredTotals = useMemo(() => totals(filtered), [filtered])
+  const filteredTotal = useMemo(() => totalAmount(filtered), [filtered])
 
   return (
-    <section className="produits">
+    <section className="charges">
       {error && (
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
       )}
 
-      <ProduitFilters
+      <ChargeFilters
         filters={filters}
         onChange={(f) => setFilters(normalizeFilters(f))}
         onReset={() => setFilters(defaultFilters())}
-        clientOptions={clientOptions}
+        categoryOptions={categoryOptions}
         yearOptions={yearOptions}
       />
 
       <p className="text-body-secondary small">
-        {filtered.length} / {produits.length} produit
-        {produits.length > 1 ? 's' : ''} · Prestations&nbsp;:{' '}
-        <strong>{money.format(filteredTotals.services)}</strong> ·
-        Marchandises&nbsp;:{' '}
-        <strong>{money.format(filteredTotals.goods)}</strong> · Total&nbsp;:{' '}
-        <strong>{money.format(filteredTotals.total)}</strong>
+        {filtered.length} / {charges.length} charge
+        {charges.length > 1 ? 's' : ''} · Total&nbsp;:{' '}
+        <strong>{money.format(filteredTotal)}</strong>
       </p>
 
-      {/* Always-present draft at the top of the list — adding is the most
-          common action, so the form is permanently ready. */}
-      <ProduitForm
-        clients={clients}
+      {/* Always-present draft at the top of the list. */}
+      <ChargeForm
+        suppliers={supplierOptions}
+        categories={categoryOptions}
         onSubmit={handleAdd}
         busy={saving && editing == null}
       />
 
-      {loading && produits.length === 0 ? (
+      {loading && charges.length === 0 ? (
         <p>Chargement…</p>
       ) : (
-        <ProduitsTable
-          produits={filtered}
+        <ChargesTable
+          charges={filtered}
           onEdit={setEditing}
           onDelete={setDeleting}
           onReload={() => void reload()}
@@ -206,10 +171,11 @@ export function ProduitsPage() {
           editingRow={editing?.row}
           editor={
             editing && (
-              <ProduitForm
+              <ChargeForm
                 key={editing.row}
                 initial={editing}
-                clients={clients}
+                suppliers={supplierOptions}
+                categories={categoryOptions}
                 autoFocus
                 onSubmit={handleUpdate}
                 onCancel={() => setEditing(null)}
@@ -222,16 +188,16 @@ export function ProduitsPage() {
 
       <ConfirmDialog
         open={deleting != null}
-        title="Supprimer le produit"
+        title="Supprimer la charge"
         message={
           deleting && (
             <>
-              Supprimer définitivement le produit du{' '}
+              Supprimer définitivement la charge du{' '}
               <strong>{deleting.date}</strong>
-              {deleting.client ? (
+              {deleting.supplier ? (
                 <>
                   {' '}
-                  pour <strong>{deleting.client}</strong>
+                  — <strong>{deleting.supplier}</strong>
                 </>
               ) : null}
               &nbsp;? Cette action est irréversible.

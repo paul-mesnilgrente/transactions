@@ -55,3 +55,32 @@ export async function sheetsFetch<T>(
   }
   return (await res.json()) as T
 }
+
+// Numeric sheetIds (needed for row deletion) never change, so cache per tab.
+const sheetIdCache = new Map<string, number>()
+
+interface SpreadsheetMeta {
+  sheets: { properties: { sheetId: number; title: string } }[]
+}
+
+/** Resolve the numeric ID of a tab by name (empty = first sheet). */
+export async function getSheetId(
+  token: string,
+  sheetName: string,
+): Promise<number> {
+  const key = sheetName || '(first)'
+  const cached = sheetIdCache.get(key)
+  if (cached != null) return cached
+
+  const fields = encodeURIComponent('sheets(properties(sheetId,title))')
+  const data = await sheetsFetch<SpreadsheetMeta>(`?fields=${fields}`, token)
+  const sheets = data.sheets ?? []
+  const match = sheetName
+    ? sheets.find((s) => s.properties.title === sheetName)
+    : sheets[0]
+  if (!match) {
+    throw new Error(`Onglet introuvable : ${sheetName || '(premier)'}`)
+  }
+  sheetIdCache.set(key, match.properties.sheetId)
+  return match.properties.sheetId
+}

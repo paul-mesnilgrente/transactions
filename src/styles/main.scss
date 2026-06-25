@@ -41,6 +41,17 @@ $link-color: $night-rider;
   gap: 0.4rem;
 }
 
+// Spinning refresh icon while loading.
+.tx-spin {
+  animation: tx-spin 0.8s linear infinite;
+}
+
+@keyframes tx-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 // Inline edit panel: expands under the row being edited.
 .tx-edit-row > td {
   background: transparent;
@@ -80,8 +91,21 @@ $link-color: $night-rider;
     width: 100%;
   }
 
-  .tx-table thead {
+  // Header collapses to a thin right-aligned bar holding the refresh button.
+  .tx-table thead tr {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+  }
+
+  .tx-table thead th {
     display: none;
+  }
+
+  .tx-table thead th:last-child {
+    display: block;
+    padding: 0;
+    border: none;
   }
 
   .tx-table tbody tr {
@@ -89,6 +113,21 @@ $link-color: $night-rider;
     border-radius: 0.5rem;
     padding: 0.5rem 0.85rem;
     margin-bottom: 0.75rem;
+  }
+
+  // Empty-state row: plain text, no card chrome.
+  .tx-table tbody tr.tx-empty-row {
+    border: none;
+    padding: 0;
+  }
+
+  .tx-table tbody tr.tx-empty-row > td {
+    display: block;
+    text-align: left;
+  }
+
+  .tx-table tbody tr.tx-empty-row > td::before {
+    content: none;
   }
 
   .tx-table td {
