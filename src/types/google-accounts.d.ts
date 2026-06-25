@@ -18,10 +18,12 @@ declare global {
     callback: (response: GoogleTokenResponse) => void
     error_callback?: (error: { type: string; message?: string }) => void
     prompt?: '' | 'none' | 'consent' | 'select_account'
+    /** Email of the account to use, to skip the account chooser. */
+    hint?: string
   }
 
   interface GoogleTokenClient {
-    requestAccessToken: (overrides?: { prompt?: string }) => void
+    requestAccessToken: (overrides?: { prompt?: string; hint?: string }) => void
   }
 
   interface Window {
