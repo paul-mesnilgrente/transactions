@@ -12,6 +12,7 @@ import {
   type Period,
 } from '../lib/period'
 import { monthlyBreakdown, summarize } from './metrics'
+import { MonthlyChart } from './MonthlyChart'
 
 const money = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -208,7 +209,8 @@ export function ResumePage() {
           {monthly && (
             <div className="card card-body shadow-sm mt-3">
               <h2 className="h6">Par mois — {period.year}</h2>
-              <div className="table-responsive">
+              <MonthlyChart rows={monthly} />
+              <div className="table-responsive mt-3">
                 <table className="table table-sm mb-0">
                   <thead>
                     <tr>

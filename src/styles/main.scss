@@ -41,6 +41,76 @@ $link-color: $night-rider;
   gap: 0.4rem;
 }
 
+// Monthly evolution chart (Résumé).
+$chart-charges: #d9776c;
+
+.monthly-chart__legend {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.monthly-chart__swatch {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 2px;
+  margin-right: 0.3rem;
+  vertical-align: -1px;
+}
+
+.monthly-chart__swatch--produits,
+.monthly-chart__bar--produits {
+  background-color: $downey;
+}
+
+.monthly-chart__swatch--charges,
+.monthly-chart__bar--charges {
+  background-color: $chart-charges;
+}
+
+.monthly-chart__plot {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.3rem;
+  height: 180px;
+}
+
+.monthly-chart__group {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+
+.monthly-chart__bar {
+  width: 45%;
+  max-width: 16px;
+  border-radius: 2px 2px 0 0;
+  transition: opacity 0.15s ease;
+}
+
+.monthly-chart__group:hover .monthly-chart__bar {
+  opacity: 0.8;
+}
+
+.monthly-chart__labels {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+}
+
+.monthly-chart__label {
+  flex: 1;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #777;
+}
+
 // Spinning refresh icon while loading.
 .tx-spin {
   animation: tx-spin 0.8s linear infinite;
