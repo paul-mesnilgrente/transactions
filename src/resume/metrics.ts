@@ -77,6 +77,65 @@ export interface MonthRow {
   resultat: number
 }
 
+export interface YearCell {
+  year: string
+  prestations: number
+  marchandises: number
+}
+
+export interface MonthAcrossYears {
+  label: string
+  cells: YearCell[]
+}
+
+export interface ProduitsAcrossYears {
+  years: string[]
+  months: MonthAcrossYears[]
+}
+
+/**
+ * Produits by calendar month, broken down per year (and split into prestations
+ * vs marchandises). Years are sorted ascending. Spans the whole dataset.
+ */
+export function produitsAcrossYears(
+  produits: ProduitRecord[],
+): ProduitsAcrossYears {
+  const yearSet = new Set<number>()
+  for (const p of produits) {
+    const d = dateParts(p.date)
+    if (d) yearSet.add(d.year)
+  }
+  const years = [...yearSet].sort((a, b) => a - b).map(String)
+
+  // key `${month}-${year}` -> summed amounts
+  const acc = new Map<string, { prestations: number; marchandises: number }>()
+  for (const p of produits) {
+    const d = dateParts(p.date)
+    if (!d) continue
+    const key = `${d.month}-${d.year}`
+    const cur = acc.get(key) ?? { prestations: 0, marchandises: 0 }
+    cur.prestations += p.servicesAmount ?? 0
+    cur.marchandises += p.goodsAmount ?? 0
+    acc.set(key, cur)
+  }
+
+  const months = MONTHS.map((m) => {
+    const mn = Number(m.value)
+    return {
+      label: m.label,
+      cells: years.map((y) => {
+        const c = acc.get(`${mn}-${Number(y)}`) ?? {
+          prestations: 0,
+          marchandises: 0,
+        }
+        return { year: y, prestations: c.prestations, marchandises: c.marchandises }
+      }),
+    }
+  })
+
+  return { years, months }
+}
+
 /** Per-month produits/charges/résultat for a given year (full datasets in). */
 export function monthlyBreakdown(
   produits: ProduitRecord[],

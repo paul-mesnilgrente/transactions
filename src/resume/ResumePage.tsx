@@ -11,8 +11,9 @@ import {
   yearsInDates,
   type Period,
 } from '../lib/period'
-import { monthlyBreakdown, summarize } from './metrics'
+import { monthlyBreakdown, produitsAcrossYears, summarize } from './metrics'
 import { MonthlyChart } from './MonthlyChart'
+import { ProduitsYearChart } from './ProduitsYearChart'
 
 const money = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -106,6 +107,12 @@ export function ResumePage() {
         ? monthlyBreakdown(produits, charges, period.year)
         : null,
     [produits, charges, period],
+  )
+
+  // Spans all years, independent of the period filter.
+  const produitsAcross = useMemo(
+    () => produitsAcrossYears(produits),
+    [produits],
   )
 
   return (
@@ -248,6 +255,13 @@ export function ResumePage() {
                   </tfoot>
                 </table>
               </div>
+            </div>
+          )}
+
+          {produits.length > 0 && (
+            <div className="card card-body shadow-sm mt-3">
+              <h2 className="h6">Produits par mois et par année</h2>
+              <ProduitsYearChart data={produitsAcross} />
             </div>
           )}
         </>
